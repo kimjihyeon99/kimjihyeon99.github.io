@@ -1,11 +1,12 @@
 ---
 layout: post
 title: "[RUST] Error handling"
-date: 2021-02-27
+date: "%Y-%M-%d" 
 image: 12.jpg
 tags: [rust, error]
 categories: rust
 ---
+
 Error Handling은 실패의 가능성을 처리하는 방법임
 에러들을 주의하고 명확하게 관리해야 다양한 에러상황에서 프로그램의 나머지를 보호할 수 있음
 
@@ -22,7 +23,7 @@ Error Handling은 실패의 가능성을 처리하는 방법임
 라이브러리가 내부적으로 `painc!`을 호출하는 경우도 있음
  예)배열의 범위를 벗어난 원소를 접근하고자 하면, 프로그램 종료 후 오류 메시지 출력함
 
-{% highlight rust %}
+```rust
 fn give_princess(gift: &str) {
     if gift == "snake" { panic!("AAAaaaaa!!!!"); }
 
@@ -33,7 +34,7 @@ fn main() {
     give_princess("teddy bear");
     give_princess("snake");
 }
-{% endhighlight %}
+```
 
 *backtrace (역추적)
 `panic!`함수가 호출되면 프로그램 종료되고 오류메시지와 오류 지점이 출력된 후 다음과 같은 문장이 출력됨
@@ -54,7 +55,7 @@ fn main() {
 이 경우는 `match`를 통해 명시적으로 처리되거나 `unwrap`으로 암시적으로 처리됨
 암시적 처리는 내부요소를 반환하거나 `panic`을 반환함
 
-{% highlight rust %}
+```rust
 fn give_commoner(gift: Option<&str>) {
     // 각 경우에 따라 처리 과정을 지시
     match gift {
@@ -83,7 +84,7 @@ fn main() {
     give_princess(nothing);
 
 }
-{% endhighlight %}
+```
 
 ![image](https://user-images.githubusercontent.com/44187194/109378256-7a1d9d00-7914-11eb-9b14-8b6204636416.png)
 
@@ -125,7 +126,7 @@ fn main() {
 - Result 열거값을 반환
 - 작업의 성공 여부에 따라 `Ok` 또는 `Err`를 직접반환
 
-{% highlight rust %}
+```rust
 use std::fs::File;
 use std::io;
 use std::io::Read;
@@ -157,7 +158,7 @@ fn read_username_from_file() -> Result<String, io::Error> {
         Err(e) => Err(e),
     }
 }
-{% endhighlight %}
+```
 
 <결과 화면>
 파일이 존재할 경우 
@@ -171,7 +172,7 @@ fn read_username_from_file() -> Result<String, io::Error> {
 
 > `?`은 반환타입이 `Result` 일때만 사용가능함
 
-{% highlight rust %}
+```rust
 use std::fs::File;
 use std::io;
 use std::io::Read;
@@ -207,13 +208,12 @@ fn read_username_from_file() -> Result<String, io::Error> {
     Ok(s)
 }
 
-{% endhighlight %}
+```
 
 간결하고 가독성 높으면서 오류에 대한 처리가 된 코드가 됨
 우리가 작성한 코드를 `fs`의 메서드를 사용하면 더 쉽게 작성할 수 있음
 
-
-{% highlight rust %}
+```rust
 use std::error::Error;
 use std::fs::File;
 
@@ -221,7 +221,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let f = File::open("hello.txt")?;
     Ok(())
 }
-{% endhighlight %}
+```
 
 - main함수가 리턴할 수 있는 타입중 하나는 ()이며, Result<T,E> 타입을 리턴할 수 있음
 - Box<dyn Error> 타입은 trait 객체라고 부르는 타입, '모든 종류의 에러'를 의미함
