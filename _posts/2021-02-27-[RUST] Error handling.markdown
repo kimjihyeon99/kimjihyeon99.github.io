@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "[RUST] Error handling"
-date: "2021-02-27 12:00:00" 
+date: "2021-02-27 12:00:00 +0200" 
 image: 12.jpg
 tags: [rust, error]
 categories: rust
