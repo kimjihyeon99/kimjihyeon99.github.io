@@ -192,12 +192,12 @@ fn read_username_from_file() -> Result<String, io::Error> {
 
     Ok(s)
 }
-{% endhighlight %}
+```
 
 `?` 이후에 호출을 이어갈 수 있는데 
 작업을 성공한 경우만 다음 메서드가 호출, 그렇지 않은 경우 오류가 전파됨
 
-{% highlight rust %}
+```rust
 // 중복 부분 생략
 
 fn read_username_from_file() -> Result<String, io::Error> {
