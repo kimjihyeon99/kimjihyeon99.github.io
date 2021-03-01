@@ -39,16 +39,19 @@ fn main() {
 -backtrace (역추적)
 `panic!`함수가 호출되면 프로그램 종료되고 오류메시지와 오류 지점이 출력된 후 다음과 같은 문장이 출력됨
 
+![image]("./images/rust1/content1.png")
+
 ![image](https://user-images.githubusercontent.com/44187194/109315962-734c4700-788e-11eb-8230-478e7e7b0150.png)
 
 `cargo run RUST_BACKTRACE=full`을 작성하면 `panic!`이 발생했을 때 호출과정을 역추적 할 수 있음
 기본적으로 디버그 모드로 수행되기 때문에 해당 동작이 가능함
 
 <출력화면>
+![image]("./images/rust1/content2.png")
 
 ![image](https://user-images.githubusercontent.com/44187194/109375800-e42d4680-7902-11eb-8ac0-6c01e3859892.png)
 
-2. Option & unwrap
+1. Option & unwrap
 
 이전 코드에서 아무런 선물(문자열)을 받지 못할 경우도 나쁜 경우가 되도록 처리할 필요가 있음
 `std`라이브러리에 있는 `Option<T>`로 불리는 enum이 부재가 가능할 때 사용됨
@@ -89,6 +92,7 @@ fn main() {
 
 }
 ```
+![image]("./images/rust1/content3.png")
 
 ![image](https://user-images.githubusercontent.com/44187194/109378256-7a1d9d00-7914-11eb-9b14-8b6204636416.png)
 
@@ -117,11 +121,14 @@ fn main() {
 
 > `match`표현식과 같은 방법으로 처리
 
+![image]("./images/rust1/content4.png")
 ![image](https://user-images.githubusercontent.com/44187194/109378593-3aa48000-7917-11eb-9634-99595cf8fb37.png)
 
 결과 : hello.txt 파일 생성
 
 2) 중첩보다 간단한 방법으로 파일 생성
+
+![image]("./images/rust1/content5.png")
 
 ![image](https://user-images.githubusercontent.com/44187194/109378645-aa1a6f80-7917-11eb-99fd-5204b23b574b.png)
 
@@ -191,6 +198,8 @@ fn read_username_from_file() -> Result<String, io::Error> {
 <결과 화면>
 
 파일이 존재할 경우 
+
+![image]("./images/rust1/content6.png")
 
 ![image](https://user-images.githubusercontent.com/44187194/109380924-b653fc00-791a-11eb-87f3-8d9b46e8cf8b.png)
 
