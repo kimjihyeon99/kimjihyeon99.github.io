@@ -11,17 +11,26 @@ Error Handling은 실패의 가능성을 처리하는 방법임
 에러들을 주의하고 명확하게 관리해야 다양한 에러상황에서 프로그램의 나머지를 보호할 수 있음
 
 ### 회복 불가능한 오류
-1. painc 
+
+1. painc
+
 회복 불가능한 오류를 만났을때 어떤 오류가 발생했는지 띄어주고 종료함
+
 따로 `panic` 매크로를 설정하지 않으면, 그동안 쌓인 스택을 풀어주고 종료
+
 
 *스택풀기 : 스택 메모리에 쌓여있는 함수들의 자료를 처리하는 작업
 
+
 `panic!` 매크로는 인자로 문자열을 받음
+
 `panic!` 매크로가 호출되면 인자로 받은 문자열이 출력되고, 어디에서 호출되었는지 알려줌
 
+
 라이브러리가 내부적으로 `painc!`을 호출하는 경우도 있음
+
  예)배열의 범위를 벗어난 원소를 접근하고자 하면, 프로그램 종료 후 오류 메시지 출력함
+
 
 ```rust
 fn give_princess(gift: &str) {
@@ -37,30 +46,38 @@ fn main() {
 ```
 
 -backtrace (역추적)
+
 `panic!`함수가 호출되면 프로그램 종료되고 오류메시지와 오류 지점이 출력된 후 다음과 같은 문장이 출력됨
 
-![image]("./images/rust1/content1.png")
 
 ![image](https://user-images.githubusercontent.com/44187194/109315962-734c4700-788e-11eb-8230-478e7e7b0150.png)
 
+
 `cargo run RUST_BACKTRACE=full`을 작성하면 `panic!`이 발생했을 때 호출과정을 역추적 할 수 있음
+
 기본적으로 디버그 모드로 수행되기 때문에 해당 동작이 가능함
 
-<출력화면>
-![image]("./images/rust1/content2.png")
 
-![image](https://user-images.githubusercontent.com/44187194/109375800-e42d4680-7902-11eb-8ac0-6c01e3859892.png)
+<출력화면>
+
+![image](https://user-images.githubusercontent.com/44187194/109594431-1f738380-7b56-11eb-8096-343831478a92.png)
 
 1. Option & unwrap
 
+
 이전 코드에서 아무런 선물(문자열)을 받지 못할 경우도 나쁜 경우가 되도록 처리할 필요가 있음
+
 `std`라이브러리에 있는 `Option<T>`로 불리는 enum이 부재가 가능할 때 사용됨
 
 - Some(T) : T타입의 요소가 발견됐을 댸
+
 - None : 요소가 없을때
 
+
 이 경우는 `match`를 통해 명시적으로 처리되거나 `unwrap`으로 암시적으로 처리됨
+
 암시적 처리는 내부요소를 반환하거나 `panic`을 반환함
+
 
 ```rust
 fn give_commoner(gift: Option<&str>) {
@@ -92,9 +109,10 @@ fn main() {
 
 }
 ```
-![image]("./images/rust1/content3.png")
 
-![image](https://user-images.githubusercontent.com/44187194/109378256-7a1d9d00-7914-11eb-9b14-8b6204636416.png)
+
+![image](https://user-images.githubusercontent.com/44187194/109594536-52b61280-7b56-11eb-91a1-9e07da24bc0f.png)
+
 
 ### 회복 가능한 오류
 
@@ -117,18 +135,19 @@ fn main() {
 
 
 
-1) Result 를 사용해 파일 열기 
+1)Result 를 사용해 파일 열기 
 
 > `match`표현식과 같은 방법으로 처리
 
-![image]("./images/rust1/content4.png")
+
 ![image](https://user-images.githubusercontent.com/44187194/109378593-3aa48000-7917-11eb-9634-99595cf8fb37.png)
+
 
 결과 : hello.txt 파일 생성
 
-2) 중첩보다 간단한 방법으로 파일 생성
 
-![image]("./images/rust1/content5.png")
+2)중첩보다 간단한 방법으로 파일 생성
+
 
 ![image](https://user-images.githubusercontent.com/44187194/109378645-aa1a6f80-7917-11eb-99fd-5204b23b574b.png)
 
@@ -199,9 +218,9 @@ fn read_username_from_file() -> Result<String, io::Error> {
 
 파일이 존재할 경우 
 
-![image]("./images/rust1/content6.png")
 
 ![image](https://user-images.githubusercontent.com/44187194/109380924-b653fc00-791a-11eb-87f3-8d9b46e8cf8b.png)
+
 
 오류가 발생하는 지점마다 매번 match 표현을 사용하면 가독성이 떨어짐
 
