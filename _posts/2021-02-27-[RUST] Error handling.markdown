@@ -62,7 +62,7 @@ fn main() {
 
 ![image](https://user-images.githubusercontent.com/44187194/109594431-1f738380-7b56-11eb-8096-343831478a92.png)
 
-1. Option & unwrap
+2. Option & unwrap
 
 
 이전 코드에서 아무런 선물(문자열)을 받지 못할 경우도 나쁜 경우가 되도록 처리할 필요가 있음
