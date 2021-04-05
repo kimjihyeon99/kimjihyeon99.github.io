@@ -17,13 +17,23 @@ categories: antlr
 ## 1. pragma 선언테스트
 
 ````sol
-
 pragma solidity 0.4.4;
-
 ````
 
-### 테스트 1의 결과 
+####  -테스트 1의 결과 
 
 ![image](https://user-images.githubusercontent.com/44187194/113542546-7cfc6380-961f-11eb-8e2c-7bee1db99b99.png)
 
+
+## 2. contract와 function 선언 테스트 
+````sol
+pragma solidity 0.4.4;
+contract foo {
+  function fun() {
+  }
+}
+````
+#### -테스트 2의 결과 
+
+![image](https://user-images.githubusercontent.com/44187194/113543162-c26d6080-9620-11eb-82d8-0cce9fb0fb34.png)
 
