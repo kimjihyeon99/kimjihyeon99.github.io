@@ -16,11 +16,13 @@ categories: antlr
 
 ## 1. pragma 선언테스트
 
+(1) Operator 없는 pragma 선언 
+
 ````sol
 pragma solidity 0.4.4;
 ````
 
-####  -테스트 1의 결과 
+  - Operator 없는 pragma 선언 결과
 
 ![image](https://user-images.githubusercontent.com/44187194/113542546-7cfc6380-961f-11eb-8e2c-7bee1db99b99.png)
 
@@ -36,6 +38,11 @@ contract foo {
   }
 }
 ````
+
+  - 빈 func 결과
+
+![image](https://user-images.githubusercontent.com/44187194/113543162-c26d6080-9620-11eb-82d8-0cce9fb0fb34.png)
+
 (2) identifier 선언 및 연산 func
 
 ````sol
@@ -47,18 +54,31 @@ contract test {
 }
 ````
 
-####  -테스트 2의 결과 
-
-(1) 빈 func 결과
-
-![image](https://user-images.githubusercontent.com/44187194/113543162-c26d6080-9620-11eb-82d8-0cce9fb0fb34.png)
-
-(2) identifier 선언 및 연산 func 결과
+  - identifier 선언 및 연산 func 결과
 
 ![image](https://user-images.githubusercontent.com/44187194/113667157-5572cd00-96eb-11eb-8dc8-b44bf36a02d6.png)
 
+(3) mapping 선언 및 연산 func
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function fun(uint256 a) {
+        var b = 5;
+        uint256 c;
+        mapping(address=>bytes32) d;
+    }
+}
+````
+
+  -  mapping 선언 및 연산 func 결과
+
+![image](https://user-images.githubusercontent.com/44187194/113669912-632a5180-96ef-11eb-9a9c-ab00f77c82c1.png)
+
 
 ## 3. contract와 enum 선언테스트 
+
+(1) 빈 enum 선언
 
 ````sol
 pragma solidity 0.4.4;
@@ -67,7 +87,9 @@ contract c {
 }
 ````
 
-####  -테스트 3의 결과
+  - 빈 enum 선언 결과 
 
 ![image](https://user-images.githubusercontent.com/44187194/113667609-011c1d00-96ec-11eb-99ab-e077afcaa650.png)
+
+
 
