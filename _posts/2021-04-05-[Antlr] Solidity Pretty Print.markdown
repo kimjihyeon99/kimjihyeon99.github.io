@@ -26,6 +26,9 @@ pragma solidity 0.4.4;
 
 
 ## 2. contract와 function 선언테스트 
+
+(1) 빈 func
+
 ````sol
 pragma solidity 0.4.4;
 contract foo {
@@ -33,17 +36,37 @@ contract foo {
   }
 }
 ````
+(2) identifier 선언 및 연산 func
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function fun(uint256 a) {
+        uint256 x = 3 ** a;
+    }
+}
+````
+
 ####  -테스트 2의 결과 
+
+(1) 빈 func 결과
 
 ![image](https://user-images.githubusercontent.com/44187194/113543162-c26d6080-9620-11eb-82d8-0cce9fb0fb34.png)
 
+(2) identifier 선언 및 연산 func 결과
+
+![image](https://user-images.githubusercontent.com/44187194/113667157-5572cd00-96eb-11eb-8dc8-b44bf36a02d6.png)
+
+
 ## 3. contract와 enum 선언테스트 
+
 ````sol
 pragma solidity 0.4.4;
 contract c {
     enum foo { }
 }
 ````
+
 ####  -테스트 3의 결과
 
 ![image](https://user-images.githubusercontent.com/44187194/113543928-53910700-9622-11eb-892b-de13e3e6619f.png)
