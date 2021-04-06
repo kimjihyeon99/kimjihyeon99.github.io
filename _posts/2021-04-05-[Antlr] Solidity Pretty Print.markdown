@@ -69,5 +69,5 @@ contract c {
 
 ####  -테스트 3의 결과
 
-![image](https://user-images.githubusercontent.com/44187194/113543928-53910700-9622-11eb-892b-de13e3e6619f.png)
+![image](https://user-images.githubusercontent.com/44187194/113667609-011c1d00-96ec-11eb-99ab-e077afcaa650.png)
 
