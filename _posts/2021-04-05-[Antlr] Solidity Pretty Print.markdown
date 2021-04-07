@@ -75,6 +75,25 @@ contract test {
 
 ![image](https://user-images.githubusercontent.com/44187194/113669912-632a5180-96ef-11eb-9a9c-ab00f77c82c1.png)
 
+(4) if else 문 선언 func
+ 
+```` sol
+pragma solidity 0.4.4;
+contract test {
+   function fun(uint256 a) {
+       if (a >= 8) {
+           return;
+       } else {
+            var b = 7;
+       }
+   }
+}
+````
+ 
+  -  if else 문 선언 func 결과
+
+![image](https://user-images.githubusercontent.com/44187194/113883857-7e818380-97f9-11eb-8607-35d44526339e.png)
+
 
 ## 3. contract와 enum 선언테스트 
 
@@ -91,5 +110,5 @@ contract c {
 
 ![image](https://user-images.githubusercontent.com/44187194/113667609-011c1d00-96ec-11eb-99ab-e077afcaa650.png)
 
-
+## 
 
