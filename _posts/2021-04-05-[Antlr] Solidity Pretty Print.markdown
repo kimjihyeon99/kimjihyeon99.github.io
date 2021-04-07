@@ -94,6 +94,25 @@ contract test {
 
 ![image](https://user-images.githubusercontent.com/44187194/113883857-7e818380-97f9-11eb-8607-35d44526339e.png)
 
+(5) while 문 선언 func 
+
+````sol
+contract test {
+    function fun(uint256 a) {
+        while (true) {
+            uint256 x = 1;
+            break;
+            continue;
+        }
+        x = 9;
+    }
+}
+````
+
+  - while 문 선언 func 결과
+  
+![image](https://user-images.githubusercontent.com/44187194/113884847-49c1fc00-97fa-11eb-94a4-e43318a14ace.png)
+
 
 ## 3. contract와 enum 선언테스트 
 
