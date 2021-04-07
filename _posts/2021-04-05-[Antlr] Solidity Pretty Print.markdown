@@ -97,6 +97,7 @@ contract test {
 (5) while 문 선언 func 
 
 ````sol
+pragma solidity 0.4.4;
 contract test {
     function fun(uint256 a) {
         while (true) {
@@ -113,6 +114,26 @@ contract test {
   
 ![image](https://user-images.githubusercontent.com/44187194/113884847-49c1fc00-97fa-11eb-94a4-e43318a14ace.png)
 
+(6) for 문 선언 func
+
+조건문 없는 for 문
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function fun(uint256 a) {
+        uint256 i = 0;
+        for (;;) {
+            uint256 x = i;
+            break;
+            continue;
+        }
+    }
+}
+````
+
+  - for 문 선언 func 결과 
+
+![image](https://user-images.githubusercontent.com/44187194/113885403-c6ed7100-97fa-11eb-8e51-90e964f570e0.png)
 
 ## 3. contract와 enum 선언테스트 
 
