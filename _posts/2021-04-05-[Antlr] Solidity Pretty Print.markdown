@@ -14,6 +14,8 @@ categories: antlr
 
 구현 IDE : Intelij
 
+테스트 Input : grammars-v4/test.sol
+
 ## 1. pragma 선언테스트
 
 (1) Operator 없는 pragma 선언 
@@ -213,3 +215,20 @@ contract test {
   - SignExpr, PostCrementExpr, BitwiseNotExpr, NotExpr 사용 결과
  
 ![image](https://user-images.githubusercontent.com/44187194/114016291-a7f7e900-98a5-11eb-8a78-cad72b829c46.png)
+
+
+## 구현 미완성
+(1) visitTupleExpression 구현 
+
+![image](https://user-images.githubusercontent.com/44187194/114027251-235f9780-98b2-11eb-9422-86b0b2bf7d1a.png)
+
+해당 조건을 어떻게 케이스를 나누어야할지 모르겠다.
+
+## 테스트 input과 g4파일과 다른 점
+
+g4에서 
+
+Library 타입이 사라짐
+
+[] 안에 expression이 들어가야만 선언 가능
+
