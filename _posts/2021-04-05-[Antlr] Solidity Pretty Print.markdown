@@ -117,6 +117,7 @@ contract test {
 (6) for 문 선언 func
 
 조건문 없는 for 문
+
 ````sol
 pragma solidity 0.4.4;
 contract test {
@@ -131,9 +132,29 @@ contract test {
 }
 ````
 
-  - for 문 선언 func 결과 
+  - 조건문 없는 for 문 선언 func 결과 
 
 ![image](https://user-images.githubusercontent.com/44187194/113885403-c6ed7100-97fa-11eb-8e51-90e964f570e0.png)
+
+조건문 있는 for 문
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function fun(uint256 a) {
+        uint256 i = 0;
+        for (i = 0; i < 10; i++) {
+            uint256 x = i;
+            break;
+            continue;
+        }
+    }
+}
+````
+  - 조건문 있는 for 문 선언 func 결과 
+
+![image](https://user-images.githubusercontent.com/44187194/113970168-5df51000-9871-11eb-8c38-ab2175c2babe.png)
+
 
 ## 3. contract와 enum 선언테스트 
 
