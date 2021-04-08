@@ -155,6 +155,21 @@ contract test {
 
 ![image](https://user-images.githubusercontent.com/44187194/113970168-5df51000-9871-11eb-8c38-ab2175c2babe.png)
 
+(7) return 선언 func 
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function f() returns(bool succeeded) {
+        return false;
+    }
+}
+````
+
+  - return 선언 func 결과 
+
+![image](https://user-images.githubusercontent.com/44187194/113971002-dd371380-9872-11eb-8ff6-e69307b5a087.png)
+
 
 ## 3. contract와 enum 선언테스트 
 
