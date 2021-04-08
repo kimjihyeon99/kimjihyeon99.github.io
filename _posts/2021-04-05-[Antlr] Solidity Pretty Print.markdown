@@ -186,5 +186,30 @@ contract c {
 
 ![image](https://user-images.githubusercontent.com/44187194/113667609-011c1d00-96ec-11eb-99ab-e077afcaa650.png)
 
-## 
+## 4. expression 선언테스트
 
+(1) SignExpr, PostCrementExpr, BitwiseNotExpr, NotExpr 사용
+
+SignExpr : op=('+' | '-') expr=expression
+
+PostCrementExpr : expr=expression op=('++' | '--')
+
+BitwiseNotExpr : '~' expr=expression
+
+NotExpr : '!' expr=expression
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function f() {
+        uint a = +10;
+        a--;
+        a = ~a;
+        bool b = !true;
+    }
+}
+````
+
+  - SignExpr, PostCrementExpr, BitwiseNotExpr, NotExpr 사용 결과
+ 
+![image](https://user-images.githubusercontent.com/44187194/114016291-a7f7e900-98a5-11eb-8a78-cad72b829c46.png)
