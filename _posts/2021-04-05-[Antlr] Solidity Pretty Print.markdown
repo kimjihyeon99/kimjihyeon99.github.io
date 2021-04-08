@@ -56,7 +56,7 @@ contract test {
 
   - identifier 선언 및 연산 func 결과
 
-![image](https://user-images.githubusercontent.com/44187194/113667157-5572cd00-96eb-11eb-8dc8-b44bf36a02d6.png)
+![image](https://user-images.githubusercontent.com/44187194/113970330-a7455f80-9871-11eb-8587-c09e69aa13b6.png)
 
 (3) mapping 선언 및 연산 func
 
