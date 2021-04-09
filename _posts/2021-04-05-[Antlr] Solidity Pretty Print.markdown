@@ -14,6 +14,8 @@ categories: antlr
 
 구현 IDE : Intelij
 
+테스트 문법 : https://github.com/kimjihyeon99/zkay/blob/master/zkay/solidity_parser/Solidity.g4
+
 테스트 Input : grammars-v4/test.sol
 
 ## 1. pragma 선언테스트
@@ -275,6 +277,29 @@ contract test {
 
 ![image](https://user-images.githubusercontent.com/44187194/114185480-bcf57a80-9980-11eb-8ed2-c7d3430a5bc8.png)
 
+## 5. elementaryTypeName 선언테스트
+
+elementaryTypeName :
+
+name=('address' | 'address payable' | 'bool' | Int | Uint | // Supported types
+          'var' | 'string' | 'bytes' | 'byte' | Byte | Fixed | Ufixed )  ; // Unsupported types
+
+(1) fixed 와 ufixed 사용
+
+````sol
+pragma solidity 0.4.4;
+contract A {
+    fixed40x40 storeMe;
+    function f(ufixed x, fixed32x32 y) {
+        ufixed8x8 a;
+        fixed b;
+    }
+}
+````
+
+  - fixed 와 ufixed 사용 결과
+
+![image](https://user-images.githubusercontent.com/44187194/114189045-b8cb5c00-9984-11eb-9bd2-0782a93799ce.png)
 
 
 ## 구현 미완성
