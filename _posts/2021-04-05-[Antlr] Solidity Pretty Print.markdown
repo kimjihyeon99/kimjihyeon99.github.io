@@ -238,6 +238,25 @@ contract test {
 
 ![image](https://user-images.githubusercontent.com/44187194/114182794-009ab500-997e-11eb-95c9-98f973034374.png)
 
+(3) IterExpr 사용
+
+IterExpr : cond=expression '?' then_expr=expression ':' else_expr=expression
+
+````sol
+pragma solidity 0.4.4;
+contract A {
+    function f() {
+        uint y = 1;
+        uint x = 3 < 0 ? x = 3 : 6;
+        true ? x = 3 : 4;
+    }
+}
+````
+
+  - IterExpr 사용
+
+![image](https://user-images.githubusercontent.com/44187194/114183683-e6ada200-997e-11eb-9546-6a62cf8aa58e.png)
+
 
 ## 구현 미완성
 (1) visitTupleExpression 구현 
