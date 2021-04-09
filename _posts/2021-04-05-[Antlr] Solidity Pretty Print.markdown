@@ -257,6 +257,25 @@ contract A {
 
 ![image](https://user-images.githubusercontent.com/44187194/114183683-e6ada200-997e-11eb-9546-6a62cf8aa58e.png)
 
+(3) numberLiteral, Strimg Literal 사용
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function fun(uint256 a) {
+        var b = 2;
+        uint256 c = 0x87;
+        mapping(address=>bytes32) d;
+        bytes32 name = "Solidity";
+    }
+}
+````
+
+  - numberLiteral, Strimg Literal 사용 결과
+
+![image](https://user-images.githubusercontent.com/44187194/114185480-bcf57a80-9980-11eb-8ed2-c7d3430a5bc8.png)
+
+
 
 ## 구현 미완성
 (1) visitTupleExpression 구현 
@@ -279,3 +298,4 @@ Library 타입이 사라짐
 
 var ( tupleExpression ) 선언 불가능
 
+ hex'00AA0000'와 같은 표현식 대신 0x[알파벳,숫자] 와 같은 형식으로 선언 가능
