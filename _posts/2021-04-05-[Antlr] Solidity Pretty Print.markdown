@@ -216,6 +216,28 @@ contract test {
  
 ![image](https://user-images.githubusercontent.com/44187194/114016291-a7f7e900-98a5-11eb-8a78-cad72b829c46.png)
 
+(2) Tuple 사용
+
+TupleExpr : expr=tupleExpression 
+
+tupleExpression : '(' ( expression? ( ',' expression? )* ) ')'
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function f() {
+        uint256 a;
+        (a,) = g();
+        (,) = g();
+        () = ();
+    }
+}
+````
+
+  - Tuple 사용 결과
+
+![image](https://user-images.githubusercontent.com/44187194/114182794-009ab500-997e-11eb-95c9-98f973034374.png)
+
 
 ## 구현 미완성
 (1) visitTupleExpression 구현 
@@ -224,6 +246,10 @@ contract test {
 
 해당 조건을 어떻게 케이스를 나누어야할지 모르겠다.
 
+![image](https://user-images.githubusercontent.com/44187194/114182959-393a8e80-997e-11eb-8eb2-a3707c81f4fd.png)
+
+다음과 같이 구현을 했지만 리팩토링이 아직 필요하다. 
+
 ## 테스트 input과 g4파일과 다른 점
 
 g4에서 
@@ -231,4 +257,6 @@ g4에서
 Library 타입이 사라짐
 
 [] 안에 expression이 들어가야만 선언 가능
+
+var ( tupleExpression ) 선언 불가능
 
