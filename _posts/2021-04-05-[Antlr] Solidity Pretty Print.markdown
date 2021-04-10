@@ -244,6 +244,8 @@ contract test {
 
 IterExpr : cond=expression '?' then_expr=expression ':' else_expr=expression
 
+예1) 일반적인 사용
+
 ````sol
 pragma solidity 0.4.4;
 contract A {
@@ -255,9 +257,28 @@ contract A {
 }
 ````
 
-  - IterExpr 사용
+예2) codition에 괄호 있는 형식
+
+````sol
+pragma solidity 0.4.4;
+contract A {
+    function f() {
+        uint x = 3 > 0 ? 3 : 0;
+        uint y = (3 > 0) ? 3 : 0;
+    }
+}
+````
+
+  - IterExpr 사용 결과
+
+예1)
 
 ![image](https://user-images.githubusercontent.com/44187194/114183683-e6ada200-997e-11eb-9546-6a62cf8aa58e.png)
+
+예2)
+
+![image](https://user-images.githubusercontent.com/44187194/114256763-95d99000-99f6-11eb-82fd-bb53d5a02823.png)
+
 
 (3) numberLiteral, Strimg Literal 사용
 
@@ -282,7 +303,8 @@ contract test {
 elementaryTypeName :
 
 name=('address' | 'address payable' | 'bool' | Int | Uint | // Supported types
-          'var' | 'string' | 'bytes' | 'byte' | Byte | Fixed | Ufixed )  ; // Unsupported types
+
+      'var' | 'string' | 'bytes' | 'byte' | Byte | Fixed | Ufixed )  ; // Unsupported types
 
 (1) fixed 와 ufixed 사용
 
@@ -324,3 +346,7 @@ Library 타입이 사라짐
 var ( tupleExpression ) 선언 불가능
 
  hex'00AA0000'와 같은 표현식 대신 0x[알파벳,숫자] 와 같은 형식으로 선언 가능
+ 
+function f(uint a, uint b); 와 같은 형태의 함수 선언 불가능
+
+
