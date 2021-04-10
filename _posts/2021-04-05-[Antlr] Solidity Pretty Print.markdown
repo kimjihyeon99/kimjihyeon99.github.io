@@ -190,6 +190,24 @@ contract c {
 
 ![image](https://user-images.githubusercontent.com/44187194/113667609-011c1d00-96ec-11eb-99ab-e077afcaa650.png)
 
+(2) value 여러개인 enum 선언
+
+````sol
+pragma solidity 0.4.4;
+contract c {
+    enum validEnum { Value1, Value2, Value3, Value4 }
+    function c () {
+        a = validEnum.Value3;
+    }
+    validEnum a;
+}
+````
+
+  - value 여러개인 enum 선언 결과
+
+![image](https://user-images.githubusercontent.com/44187194/114257150-f5d13600-99f8-11eb-86b6-ea6c8ccee820.png)
+
+
 ## 4. expression 선언테스트
 
 (1) SignExpr, PostCrementExpr, BitwiseNotExpr, NotExpr 사용
