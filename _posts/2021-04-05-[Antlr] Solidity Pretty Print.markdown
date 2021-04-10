@@ -298,9 +298,27 @@ contract test {
 
 ![image](https://user-images.githubusercontent.com/44187194/114185480-bcf57a80-9980-11eb-8ed2-c7d3430a5bc8.png)
 
+(4) PrimitiveCastExpr 사용
+
+PrimitiveCastExpr : elem_type=elementaryTypeName '(' expr=expression ')'
+
+````sol
+pragma solidity 0.4.4;
+contract base {
+    function fun() {
+        uint64(2);
+    }
+}
+````
+
+  - PrimitiveCastExpr 사용 결과 
+
+![image](https://user-images.githubusercontent.com/44187194/114256871-4f386580-99f7-11eb-984b-197c5b9dfb5c.png)
+
+
 ## 5. elementaryTypeName 선언테스트
 
-elementaryTypeName :
+elementaryTypeName : 
 
 name=('address' | 'address payable' | 'bool' | Int | Uint | // Supported types
 
