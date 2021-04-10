@@ -333,6 +333,22 @@ contract base {
 
 ![image](https://user-images.githubusercontent.com/44187194/114256871-4f386580-99f7-11eb-984b-197c5b9dfb5c.png)
 
+(5) '&&' 와 '||' 연산자 사용
+
+````sol
+pragma solidity 0.4.4;
+contract test {
+    function fun(int256 a) {
+        int256 x = (1 + 4) * (a - 12) + -9;
+        bool y = true && (a < 6) || false;
+    }
+}
+````
+
+  - '&&' 와 '||' 연산자 사용 결과
+
+![image](https://user-images.githubusercontent.com/44187194/114257371-8b20fa00-99fa-11eb-9a9f-def07cb76898.png)
+
 
 ## 5. elementaryTypeName 선언테스트
 
@@ -385,4 +401,10 @@ var ( tupleExpression ) 선언 불가능
  
 function f(uint a, uint b); 와 같은 형태의 함수 선언 불가능
 
+event 선언 부분 없어짐
 
+ExternalKeyword :'external' 사용하는 부분 사라짐. 선언만 되어있음.
+
+wei, sazabo, fineey와 같은 표현이 사라짐
+
+'{' nameValueList? '}' 표현 사라짐 예) {1,2,3}
