@@ -161,6 +161,8 @@ contract test {
 
 (7) return 선언 func 
 
+예1) block내에 return 
+
 ````sol
 pragma solidity 0.4.4;
 contract test {
@@ -170,10 +172,27 @@ contract test {
 }
 ````
 
+예2) block내에 변수 선언
+
+````sol
+pragma solidity 0.4.4;
+contract c {
+    function fun() returns (uint r) {
+        var _ = 8;
+        return _ + 1;
+    }
+}
+````
+
   - return 선언 func 결과 
+
+(1)
 
 ![image](https://user-images.githubusercontent.com/44187194/113971002-dd371380-9872-11eb-8ff6-e69307b5a087.png)
 
+(2)
+
+![image](https://user-images.githubusercontent.com/44187194/114296306-8dac4e00-9ae5-11eb-9dc2-c90ad82db0c6.png)
 
 ## 3. contract와 enum 선언테스트 
 
