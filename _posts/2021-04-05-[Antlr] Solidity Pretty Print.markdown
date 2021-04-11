@@ -394,8 +394,27 @@ contract A {
 
 ![image](https://user-images.githubusercontent.com/44187194/114189045-b8cb5c00-9984-11eb-9bd2-0782a93799ce.png)
 
+## 6. Variable 선언
+
+(1) 'final' 키워드 사용
+
+````sol
+pragma solidity 0.4.4;
+contract A {
+    function f() {
+        final var a = 1;
+        uint x = true ? 1 : 0;
+        uint y = false ? 0 : 1;
+    }
+}
+````
+
+  - 'final' 키워드 사용 결과
+
+![image](https://user-images.githubusercontent.com/44187194/114297724-4aee7400-9aed-11eb-8837-4a954fbd8e48.png)
 
 ## 구현 미완성
+
 (1) visitTupleExpression 구현 
 
 ![image](https://user-images.githubusercontent.com/44187194/114027251-235f9780-98b2-11eb-9422-86b0b2bf7d1a.png)
@@ -427,3 +446,12 @@ ExternalKeyword :'external' 사용하는 부분 사라짐. 선언만 되어있�
 wei, sazabo, fineey와 같은 표현이 사라짐
 
 '{' nameValueList? '}' 표현 사라짐 예) {1,2,3}
+
+':='과 같은 표현식 사라짐
+
+assembly 표현도 없음
+
+테스트 input에 
+ 
+'fianal' 키워드  없음
+
