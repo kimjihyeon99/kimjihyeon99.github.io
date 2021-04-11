@@ -431,6 +431,11 @@ contract A {
 
 같은 규칙을 뽑아서 간단히 만드는 것에 성공하였다.
 
+EnumDefinition에도 같은 원리로 적용하였다. 
+
+![image](https://user-images.githubusercontent.com/44187194/114302709-29998200-9b05-11eb-9171-af5447c8a1bf.png)
+
+
 ## 테스트 input과 g4파일과 다른 점
 
 g4에서 
