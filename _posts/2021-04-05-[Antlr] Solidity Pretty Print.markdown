@@ -425,6 +425,12 @@ contract A {
 
 다음과 같이 구현을 했지만 리팩토링이 아직 필요하다. 
 
+리팩토링 결과
+
+![image](https://user-images.githubusercontent.com/44187194/114298263-76269280-9af0-11eb-8d8e-dd5fe6f5304f.png)
+
+같은 규칙을 뽑아서 간단히 만드는 것에 성공하였다.
+
 ## 테스트 input과 g4파일과 다른 점
 
 g4에서 
