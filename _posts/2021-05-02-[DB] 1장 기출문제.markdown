@@ -196,9 +196,9 @@ categories: DB
   
   : 업무상에서 필요로 하는 인스턴스에서 관리하고자 하는 의미상 더 이상 분리되지 않는 최소의 데이터 단위
   
- ### ✏ 15번
+### ✏ 15번
 
-![image](https://user-images.githubusercontent.com/44187194/117919631-54efd680-b328-11eb-8f3b-d94381de1b29.png)
+<img src =  https://user-images.githubusercontent.com/44187194/117919631-54efd680-b328-11eb-8f3b-d94381de1b29.png width=700 height=350>
 
 #### 답: 3번
 
@@ -206,5 +206,62 @@ categories: DB
 
   하나의 인스턴스에서 각각의 속성은 한 개의 속성값을 가져야함
   
-  
+### ✏ 16번
 
+<img src = https://user-images.githubusercontent.com/44187194/117919947-efe8b080-b328-11eb-94f6-2020244891d4.png width=700 height=350>
+
+#### 답: 3번
+
+#### 해설 
+
+  이자는 계산된 값으로 파생속성이 맞지만, 이자율은 원래 가지고 있어야 하는 속성이므로 기본 속성에 해당함
+  
+### ✏ 17번
+
+<img src = https://user-images.githubusercontent.com/44187194/117920128-4a820c80-b329-11eb-8aef-a34306af3e83.png  width=700 height=350>
+
+#### 답: 1번
+
+#### 해설 
+
+  파생속성
+  - 데이터를 조회할 때 빠른 성능을 위해 원래 속성의 값을 계산하여 저장할 수 있도록 만든 속성
+
+### ✏ 18번
+
+<img src = https://user-images.githubusercontent.com/44187194/117920275-903ed500-b329-11eb-88ce-e9a48403630d.png  width=700 height=350>
+
+#### 답: 4번
+
+#### 해설 
+
+  도메인 
+  - 각 엔터티(테이블)의 속성에 대해서 어떤 유형의 값이 들어가는지를 정의
+ 
+### ✏ 19번
+
+<img src = https://user-images.githubusercontent.com/44187194/117920464-ddbb4200-b329-11eb-9486-511b4b814e49.png width=700 height=350>
+
+#### 답: 3번
+
+#### 해설 
+
+  속성의 명칭 명명 
+  - 애매모호하지 않게
+  - 복합명사를 사용해 구체적으로
+  - 데이터 모델에서 유일성 확보
+  -> 반정규화, 통합 등의 작업시 혼란 방지 방법
+ 
+ ### ✏ 20번
+
+<img src = https://user-images.githubusercontent.com/44187194/117920653-35f24400-b32a-11eb-98a0-7cb3b659662d.png width=700 height=350>
+
+#### 답: 3번, 4번
+
+#### 해설 
+
+  데이터모델링에서 존재적 관계와 행위에 의한 관계를 구분하는 표기법이 없음
+  
+  UML에서는 연관관계와 의존관계에 대해 다른 표기법을 가지고 표현함
+  
+  
