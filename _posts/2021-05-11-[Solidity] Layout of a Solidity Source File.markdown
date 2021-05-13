@@ -39,6 +39,29 @@ Solidity 컴파일러는 기계가 읽을 수 있는 `SPDX 라이센스 식별�
 
 ### Importing other Source Files 
 
+global 수준에서 파일 가져오기
+
+````solidity
+import "filename";
+````
+
+모든 global 기호를 멤버로하는 새 글로벌 기호 이름을 만든다.
+
+````solidity
+import * as symbolName from "filename";
+
+import "filename" as symbolName;
+
+````
 
 
 ### Comments
+
+````solidity
+// This is a single-line comment.
+
+/*
+This is a
+multi-line comment.
+*/
+````
