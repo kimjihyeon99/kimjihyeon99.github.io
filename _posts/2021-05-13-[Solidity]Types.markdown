@@ -56,6 +56,44 @@ categories: solidity
 
 ##### Member of Address
 
+- `balance` 와 `transfer`
+
+`balance`를 사용해 `address`의 잔액을 조회, `transfer`를 사용해 Ether를 `address payable`로 보낼 수 있다.
+
+````solidity
+address payable x = address(0x123);
+address myAddress = address(this);
+if (x.balance < 10 && myAddress.balance >= 10) x.transfer(10);
+````
+
+현재 계약 잔액이 충분하지 않거나 Ether transfer가 수신 계정에의해 거부되는 경우  `transfer`함수 실패
+
+`transfer`함수 실패시 되돌아감
+
+- `send` 
+
+`send`는 `transfer`의 하위단계이다.
+
+실행 실패하면, 현재 contract는 예외로 중지되지 않지만 `send`는 `false`로 반환된다.
+
+- `call`, `delegatecall` and `staticcall`
+
+ABI를 준수하지 않는 contrat와 인터페이스하거나 인코딩에 대한 직접적인 제어를 얻기위해 사용함
+
+단일 바이트 메모리 매개 변수를 사용하고 성공 조건과 반환된 데이터를 반환한다.
+
+`abi.encode`, `abi.encodePacked`, `abi.encodeWithSelector` and `abi.encodeWithSignature` 함수가 구조화된 데이터를 encode하는데 사용될 수 있다.
+
+````solidity
+bytes memory payload = abi.encodeWithSignature("register(string)", "MyName");
+(bool success, bytes memory returnData) = address(nameReg).call(payload);
+require(success);
+````
+
+#### Contract Types
+
+
+
 ### Reference Types
 
 ### mapping Types
