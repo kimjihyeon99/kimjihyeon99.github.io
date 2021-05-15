@@ -311,8 +311,89 @@ contract User {
 
 ### Operators Involving LValues
 
+만약 `a`가 Lvalue인경우 다음과 같은 연산자를 사용할 수 있다. 
 
+`+=` `-=` `*=` `/=` `%=` `|=` `&=` `^=` `a++` `--a`
+
+#### delete
+
+`delete a`는 type에 대한 초기 값을 a에 할당한다. 
+
+1. 정수, 동적 배열, 정적배열도 사용 가능하다. 
+
+2. struct의 경우, 모든 member가 reset된 struct를 할당하고, 해당 member로 재귀된다.
+
+3. mapping의 경우, `delete`는 영향을 미치지 않는다. delete a[x] 는 x에 저장된 값이 삭제된다.
 
 ### Conversions between Elementary Types
 
+#### Implicit Conversions
 
+컴파일러가 할당 중, 
+
+1. 함수들의 arg를 전달할 때
+2. 연산자를 적용할 때
+3. 의미가 있고, 정보가 손실되지 않는 경우 암묵적 변환이 가능함
+
+예시)
+
+uint8 -> uint16 가능
+
+uint128 -> uint256 가능
+
+uint8 -> uint256 불가능 (uint256은 -1과 같은 값을 저장 할 수 없음)
+
+예시 코드
+
+````solidity
+uint8 y;
+uint16 z;
+uint32 x = y + z;
+````
+
+#### Explicit Conversions
+
+컴파일러가 Implicit Conversion을 허용하지 않지만, 변환이 작동할 것이라 확신할 경우 explicit 변환이 가능하다. 
+
+예시코드
+
+````solidity
+uint16 a = 0x1234;
+uint32 b = uint32(a); // b => 0x00001234 
+assert(a == b);
+````
+
+### Conversions between Literals and Elementary Types
+
+#### Integer Types
+
+10진수 또는 16진수가 잘리지 않고 잘 나타날 수 있게 변환 가능하다.
+
+````solidity
+uint8 a = 12;
+uint32 b = 1234; 
+uint16 c = 0x123456; // 실패, 0x3456
+````
+
+#### Fixed-Size Byte Arrays 
+
+10진수는 고정 크기 byte 배열로 implicit 변환 불가능하다.
+
+16진수는 바이트 types의 크기에 정확히 맞는 경우만 implicit 변환이 가능하다.
+
+예시 코드
+
+````solidity
+bytes2 a = 54321; // 10진수, 허용안함
+bytes2 b = 0x12; // 16진수, 허용안함
+bytes2 e = 0x0012; // 16진수, 크기 맞음
+bytes4 f = 0; // 예외적으로 0은 고정크기 바이트 type으로 implicit 변환 가능함
+````
+
+#### Addresses
+
+1. 다른 literal들은 implicit하게 address type 변환이 불가능하다.
+
+2. `byte20` 또는 `integer` type에서 `address`type으로 explicit 변환은 가능하다.
+
+3. `address`는 `payable(a)`을 사용해 `address payable`로 변환 가능하다.
