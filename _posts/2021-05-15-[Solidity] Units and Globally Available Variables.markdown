@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Solidity]Units and Globally Available Variables"
+title: "[Solidity] Units and Globally Available Variables"
 date: "2021-05-15 12:00:00 +0200" 
 image: 6.jpg
 tags: [solidity, units, globally ]
@@ -131,6 +131,7 @@ global namespaces에 항상 존재, 블록체인에 대한 정보를 제공하�
 |type(I).interfaceId|상속된 모든 함수를 제외하고 인터페이스 자체 내에서 정의된 모든 함수 선택기의 XOR로 정의|
 
 -Contract type T
+
 |Property|description|
 |---|---|
 |type(T).min|Type T로 나타낼 수 있는 가장 작은 값|
