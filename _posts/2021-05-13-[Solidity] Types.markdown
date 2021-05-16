@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Solidity]Types"
+title: "[Solidity] Types"
 date: "2021-05-13 12:00:00 +0200" 
 image: 7.jpg
 tags: [solidity, types]
@@ -11,25 +11,29 @@ categories: solidity
 
 ## Types
 
+
 `Solidity` 는 복합 유형을 형성하기 위해 결합될 수 있는 몇 가지 유형을 제공한다.
 
 
 연산자를 포함하는 식에서 유형이 상호작용 할 수 있다.
 
 
-`undefiend` 또는 `null`값의 개념은 Solidity에 존재하지 않지만 새로 선언된 변수는 항상 해당
+`undefiend` 또는 `null`값의 개념은 Solidity에 존재하지 않지만 새로 선언된 변수는 
 
-유형에 따라 기본값을 사용한다. 
+항상 해당 유형에 따라 기본값을 사용한다. 
+
 
 ### Value Types
 
 항상 값으로 전달 되기 때문에, `함수인수` 또는 `할당`으로 사용될 때 항상 복사됨
+
 
 #### Booleans
 
 |구문|리턴값|
 |---|---|
 |bool x|true/false|
+
 
 #### Integers
 
@@ -38,12 +42,14 @@ categories: solidity
 |int|양수, 음수 저장 가능|int==int256|
 |uint|양수만 저장가능|uint=uint256|
 
+
 #### Fixed Point Numbers
 
 |구문|설명|Keyword|설명|
 |---|---|---|---|
 |fixed|다양한 크기의 양수, 음수의 고정소수점|fixedMxN|M은 유형별 비트 수, N은 사용가능한 소수점|
 |ufixed|다양한 크기의 양수의 고정소수점|ufixedMxN|M은 8의 배수이고(8~256),N은 0~80|
+
 
 #### Address
 
@@ -52,7 +58,7 @@ categories: solidity
 |address|20byte 값(이더리움 주소의 크기)을 보유함|
 |address payable|adress와 동일하지만, 추가 멤버들과 함께 전송함|
 
-차이점은 `address payable`가 Ether로 보낼 수 있는 주소이고,  `address`는 Ether로 보낼 수 없다.
+*차이점은 `address payable`가 Ether로 보낼 수 있는 주소이고,  `address`는 Ether로 보낼 수 없다.
 
 ##### Member of Address
 
@@ -68,7 +74,7 @@ if (x.balance < 10 && myAddress.balance >= 10) x.transfer(10);
 
 현재 계약 잔액이 충분하지 않거나 Ether transfer가 수신 계정에의해 거부되는 경우  `transfer`함수 실패
 
-`transfer`함수 실패시 되돌아감
+`transfer`함수 실패시 `revert`
 
 - `send` 
 
@@ -77,6 +83,8 @@ if (x.balance < 10 && myAddress.balance >= 10) x.transfer(10);
 실행 실패하면, 현재 contract는 예외로 중지되지 않지만 `send`는 `false`로 반환된다.
 
 - `call`, `delegatecall` and `staticcall`
+
+*ABI : Application Binary Interface
 
 ABI를 준수하지 않는 contrat와 인터페이스하거나 인코딩에 대한 직접적인 제어를 얻기위해 사용함
 
@@ -89,6 +97,7 @@ bytes memory payload = abi.encodeWithSignature("register(string)", "MyName");
 (bool success, bytes memory returnData) = address(nameReg).call(payload);
 require(success);
 ````
+
 
 #### Contract Types
 
@@ -104,17 +113,20 @@ contract는 `address` 타입에서 명시적으로 변환 가능함
 
 *자세한 내용은 address type에관한 섹션에서 찾아볼 수 있다. 
 
+
 #### Function Types
 
 `function`타입의 변수는 함수에서 할당할 수 있고, 매개변수는 함수 호출에 함수를 전달하거나 반환하는데 사용할 수 있다.
 
 기능유형
+
 - 내부 : 현재 contract 내에서만 호출 가능, entry label로 점프함으로써 내부`function`가 구현됨
 - 외부 : `address`와 `function signature`로 구성, 외부 function 호출을 통해 전달 및 반환 가능
 
-+ 외부 함수 member
-- `.address` : function의 contract의 address를 반환
-- `.selector` : ABI function selector를 반환 (추가내용은 뒤에)
+  +외부 함수 member
+
+  - `.address` : function의 contract의 address를 반환
+  - `.selector` : ABI function selector를 반환 (추가내용은 뒤에)
 
 ````solidity
 function (<parameter types>) {internal|external} [pure|view|payable] [returns (<return types>)]
@@ -149,6 +161,7 @@ contract Pyramid {
         return x + y;
     }
 }
+
 //external
 contract Example {
     function f() public payable returns (bytes4) {
@@ -186,6 +199,7 @@ contract Example {
 
 동일한 데이터 위치 내의 할당은 `storage` types에 대해서만 복사된다.
 
+
 #### Arrays
 
 ##### `bytes.concat` function
@@ -205,6 +219,7 @@ contract C {
     }
 }
 ````
+
 
 ##### Array Literals
 
@@ -227,6 +242,7 @@ contract C {
 
 위의 예제에서 [1,2,3]의 type은 uint8[3] memory 이다. 결과 타입을 uint[3]으로 만들기 위해 첫번째 요소를 uint로 변환 하였다.
 
+
 ##### Array Members
 
 `length` : elements의 수를 포함. memory array 의 `length`는 고정되어있다.
@@ -237,9 +253,10 @@ contract C {
 
 `pop` : dynamic array 및 바이트 일 경우, array 끝에 element를 제거할 수 있다.
 
+
 ### mapping Types
 
-선언 예시
+선언 예시)
 
 ````solidity
 contract MappingExample {
@@ -257,13 +274,15 @@ contract MappingExample {
 
 `_valueType` : mapping, array 및 struct를 포함한 모든 유형 가능함
 
+
 #### Iterable Mappings
 
 mapping을 iterate 할 수 없다.
 
 하지만, 데이터 구조를 mapping 위에 구현하고, 그 위에 iterate하는 것은 가능하다. 
 
-예시코드
+
+예시코드)
 
 ````solidity
 library IterableMapping {
@@ -309,11 +328,13 @@ contract User {
 }
 ````
 
+
 ### Operators Involving LValues
 
 만약 `a`가 Lvalue인경우 다음과 같은 연산자를 사용할 수 있다. 
 
 `+=` `-=` `*=` `/=` `%=` `|=` `&=` `^=` `a++` `--a`
+
 
 #### delete
 
@@ -324,6 +345,7 @@ contract User {
 2. struct의 경우, 모든 member가 reset된 struct를 할당하고, 해당 member로 재귀된다.
 
 3. mapping의 경우, `delete`는 영향을 미치지 않는다. delete a[x] 는 x에 저장된 값이 삭제된다.
+
 
 ### Conversions between Elementary Types
 
@@ -343,7 +365,7 @@ uint128 -> uint256 가능
 
 uint8 -> uint256 불가능 (uint256은 -1과 같은 값을 저장 할 수 없음)
 
-예시 코드
+예시 코드)
 
 ````solidity
 uint8 y;
@@ -351,17 +373,19 @@ uint16 z;
 uint32 x = y + z;
 ````
 
+
 #### Explicit Conversions
 
 컴파일러가 Implicit Conversion을 허용하지 않지만, 변환이 작동할 것이라 확신할 경우 explicit 변환이 가능하다. 
 
-예시코드
+예시코드)
 
 ````solidity
 uint16 a = 0x1234;
 uint32 b = uint32(a); // b => 0x00001234 
 assert(a == b);
 ````
+
 
 ### Conversions between Literals and Elementary Types
 
@@ -375,13 +399,14 @@ uint32 b = 1234;
 uint16 c = 0x123456; // 실패, 0x3456
 ````
 
+
 #### Fixed-Size Byte Arrays 
 
 10진수는 고정 크기 byte 배열로 implicit 변환 불가능하다.
 
 16진수는 바이트 types의 크기에 정확히 맞는 경우만 implicit 변환이 가능하다.
 
-예시 코드
+예시 코드)
 
 ````solidity
 bytes2 a = 54321; // 10진수, 허용안함
@@ -390,10 +415,13 @@ bytes2 e = 0x0012; // 16진수, 크기 맞음
 bytes4 f = 0; // 예외적으로 0은 고정크기 바이트 type으로 implicit 변환 가능함
 ````
 
+
 #### Addresses
 
-1. 다른 literal들은 implicit하게 address type 변환이 불가능하다.
+1. 다른 literal들은 implicit하게 address type 변환이 불가능하고 `Address Literals` 만 가능하다.
 
-2. `byte20` 또는 `integer` type에서 `address`type으로 explicit 변환은 가능하다.
+2. `byte20` 또는 `integer` type에서 `address` type으로 explicit 변환은 가능하다.
 
 3. `address`는 `payable(a)`을 사용해 `address payable`로 변환 가능하다.
+
+
