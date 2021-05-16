@@ -11,11 +11,13 @@ categories: solidity
 
 ## Structure of a Contract
 
-Solidity의 Contract는 객체 지향 언어의 클래스와 유사하다.
 
-각 Contract는은 상태 변수, 함수, 함수 Modifier, 이벤트, 오류, Struct, enum 종류가 있다.
+Solidity의 Contract는 객체 지향 언어의 **클래스**와 유사하다.
 
-Contract는 다른 Contract로부터 상속받을 수 있다.
+각 Contract는은 상태 변수, 함수, 함수 Modifier, 이벤트, 오류, Struct, enum 이 있다.
+
+Contract는 다른 Contract로부터 **상속**받을 수 있다.
+
 
 ### State Variables
 
@@ -30,7 +32,8 @@ contract SimpleStorage {
 }
  ````
 
-Type, Visibillity and Getters 는 뒷내용
+* State VariablesType, Visibillity and Getters 내용은 Type 섹션에서 볼 수 있음 
+
 
 ### Functions
 
@@ -52,13 +55,17 @@ function helper(uint x) pure returns (uint) {
     return x * 2;
 }
  ````
+ 
+ 
 ### Function Modifier
 
-선언적인 방법으로 Function의 semantics을 수정하는데 사용 (Contract 섹션에 자세히 나옴)
+선언적 방식으로 Function의 함수의 의미를 수정하는데 사용할 수 있다.
 
-매개 변수가 같은 한정자 이름을 가진 overlonding 불가능
+매개 변수가 같은 한정자 이름을 가진 overlonding 불가능하다.
 
-Function처럼 Modifier도 overlonding 가능 (뒤에 자세한 내용)
+Function처럼 Modifier도 overlonding 가능하다.
+
+*Contracts 섹션에서 자세한 내용
 
  ````solidity
 pragma solidity >=0.4.22 <0.9.0;
@@ -80,6 +87,7 @@ contract Purchase {
 }
  ````
  
+ 
 ### Events
 
 EVM(이더리움 가상머신) logging 기능과의 편의 인터페이스이다.
@@ -99,15 +107,16 @@ contract SimpleAuction {
 }
  ````
  
+ 
 ### Errors
 
 고장상황에 대한 설명 이름과 데이터를 정의할 수 있다.
 
-statements 되돌리기에 사용할 수 있다.
+`revert statements` 사용할 수 있다.
 
 문자열 설명과 비교하여, `Errors`는 훨씬 저렴하고 추가 데이터를 인코딩할 수 있다.
 
-*Errors and the Revert Statemennt 에 자세한 내용
+*Contracts 섹션의 Errors and the Revert Statemennt 에 자세한 내용
 
  ````solidity
 pragma solidity ^0.8.4;
@@ -129,9 +138,10 @@ contract Token {
 }
  ````
  
+ 
 ### Struct Types
 
-`Struct`는 여러 변수를 그룹화 할 수 있는 사용자 정의 유형
+`Struct`는 여러 변수를 그룹화 할 수 있는 사용자 정의 유형이다.
 
 ````solidity
 pragma solidity >=0.4.0 <0.9.0;
@@ -146,9 +156,10 @@ contract Ballot {
 }
 ````
 
+
 ### Enum Types 
 
-`Enum`은 유한 집합 '상수 값'으로 사용자 정의 유형 생성 가능
+`Enum`은 유한 집합 '상수 값'으로 사용자 정의 유형 생성 가능하다.
 
 ````solidity
 pragma solidity >=0.4.0 <0.9.0;
