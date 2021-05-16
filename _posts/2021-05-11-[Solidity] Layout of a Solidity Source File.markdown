@@ -7,7 +7,7 @@ tags: [solidity, Source File]
 categories: solidity
 ---
 
-참고자료 : https://docs.soliditylang.org/en/v0.8.4/index.html
+참고자료 : https://docs.soliditylang.org/en/v0.8.4/layout-of-source-files.html
 
 ## Layout of a Solidity Source File
 
