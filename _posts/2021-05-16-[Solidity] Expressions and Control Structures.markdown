@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Solidity]Expressions and Control Structures"
+title: "[Solidity] Expressions and Control Structures"
 date: "2021-05-16 12:00:00 +0200" 
 image: 6.jpg
 tags: [solidity, expressions, control]
@@ -17,6 +17,7 @@ categories: solidity
 
 *if(1) {...} 불가능함. int -> bool 변환 안됨
 
+
 ### Function Calls
 
 #### Internal Function calls
@@ -29,6 +30,7 @@ contract C { //동일 contract 내 함수는 서로 internal 함수 호출 가�
     function f() internal pure returns (uint ret) { return g(7) + f(); }
 }
 ````
+
 
 #### External Function calls
 
@@ -52,6 +54,7 @@ contract Consumer {
 }
 ````
 
+
 #### Named Calls and Anonymous Function Parameters
 
 함수 호출 인자는 {}로 둘러싸여 있을 경우 임의의 순서로 이름을 지정할 수 있다.
@@ -73,6 +76,7 @@ contract C {
 }
 ````
 
+
 #### Omitted Function Parameter Names
 
 사용되지 않는 매개 변수의 이름은 생략할 수 있다.
@@ -87,6 +91,7 @@ contract C {
     }
 }
 ````
+
 
 ### Creating Contracts via new
 
@@ -111,11 +116,13 @@ contract C {
 }
 ````
 
+
 ### Order of Evaluation of Expressions
 
 expression의 evaluation의 순서가 지정되어있지 않다.
 
 구문이 순서대로 실행되고, boolean 표현식에 대한 단락이 수행된다는 것만 보장된다.
+
 
 ### Assignment
 
@@ -139,6 +146,7 @@ contract C {
     }
 }
 ````
+
 
 #### Complications for Arrays and Structs
 
@@ -170,6 +178,7 @@ contract C {
 1. g(x) 호출은 메모리에 저장 값의 독립 복사본을 만들기 때문에 x에 영향을 미치지 않는다.
 
 2. 복사본이 전달 되지 않고 참조만 전달 되므로 h(x)는 x를 수정할 수 있다.
+
 
 ### Scoping and Declarations
 
@@ -219,6 +228,7 @@ contract C {
 }
 ````
 
+
 ### Checked or Unchecked Arithmetic
 
 overflow 또는 underflow는 산술 연산의 결과 값이 제한되지 않은 정수로 실행될 때 결과 type의 범위를 벗어나는 상황
@@ -246,7 +256,9 @@ contract C {
 
 setting은 block 내에 statement에만 영향 준다.
 
+
 ### Error handling: Assert, Require, Revert and Exceptions
+
 
 `assert`와 `require`함수는 조건을 검사하고, 조건이 충족되지 않으면 예외 처리하는데 사용된다.
 
@@ -266,6 +278,7 @@ setting은 block 내에 statement에만 영향 준다.
 
 
 *`panic`이 생기는 경우는 문서 참고
+
 
 #### Require
 
@@ -290,6 +303,7 @@ setting은 block 내에 statement에만 영향 준다.
 - `new`키워드를 사용해 contract를 만들었지만, contract 생성이 제대로 완료되지 않은 경우
 
 `require`는 필요에따라 문자열을 제공할 수 있지만, `assert`는 불가능하다. 
+
 
 #### Rrevert
 
