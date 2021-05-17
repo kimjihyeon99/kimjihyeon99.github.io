@@ -103,13 +103,13 @@ require(success);
 
 모든 contract는 자신의 Type을 정의한다.
 
-contract는 `address` 타입에서 명시적으로 변환 가능함
+contract는 `address` 타입으로 명시적으로 변환 가능함
 
-`address payable`로의 명시적 전환은 contract 타입이 receive 또는 payable fallback 함수가 있는 경우 가능하다.
+`address payable`으로 명시적 변환은 contract 타입이 receive 또는 payable fallback 함수가 있는 경우 가능하다.
 
-변환은 `address(x)`을 사용한다. 
+-변환은 `address(x)`을 사용한다. 
 
-만약 ceive 또는 payable fallback 함수가 없는 경우 `payable(address(x))`을 사용한다. 
+-만약 receive 또는 payable fallback 함수가 없는 경우, `address payable`으로 변환은  `payable(address(x))`을 사용한다. 
 
 *자세한 내용은 address type에관한 섹션에서 찾아볼 수 있다. 
 
