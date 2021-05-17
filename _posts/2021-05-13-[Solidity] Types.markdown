@@ -48,7 +48,7 @@ categories: solidity
 |구문|설명|Keyword|설명|
 |---|---|---|---|
 |fixed|다양한 크기의 양수, 음수의 고정소수점|fixedMxN|M은 유형별 비트 수, N은 사용가능한 소수점|
-|ufixed|다양한 크기의 양수의 고정소수점|ufixedMxN|M은 8의 배수이고(8~256),N은 0~80|
+|ufixed|다양한 크기의 양수의 고정소수점|ufixedMxN|M은 8의 배수이고(8-256), N은 0-80|
 
 
 #### Address
@@ -182,7 +182,7 @@ contract Example {
 
 구성 : struct, arrays, mappings
 
-`Reference Type`을 사용하는 경우, 항상 저장된 데이터 영역: 
+`Reference Type`을 사용하는 경우, 항상 유형이 저장되는 데이터 영역을 명시적으로 제공해야한다.:
 
 `memory`(수명이 외부 함수호출로 제한), 
 
