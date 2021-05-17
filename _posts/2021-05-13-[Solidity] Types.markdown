@@ -193,6 +193,13 @@ contract Example {
 
 #### Data location
 
+모든 reference type에는 추가적인 annotation이 있다.
+
+data location는 어디에 저장되어있는지에 대해 지정한다. 
+
+종류 : `memory`, `storage`, `call data`
+
+
 - 할당, 변환
  
 데이터 위치를 변경하는 경우, 항상 자동 복사 작업이 수행되지만,
@@ -201,6 +208,8 @@ contract Example {
 
 
 #### Arrays
+
+배열은 compile-time에 고정된 크기를 가질 수 있고, 또는 dynamic 크기를 가질 수 있다. 
 
 ##### `bytes.concat` function
 
