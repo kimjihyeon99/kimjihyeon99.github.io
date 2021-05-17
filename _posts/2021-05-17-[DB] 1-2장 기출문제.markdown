@@ -1,0 +1,14 @@
+---
+layout: post
+title: "[DB] 1-2장 기출문제"
+date: "2021-05-02 12:00:00 +0200" 
+image: 12.jpg
+tags: [db, 1-2장, daatmodeling]
+categories: DB
+---
+
+### ✏ 31번
+
+#### 답: 2번
+
+#### 해설 
