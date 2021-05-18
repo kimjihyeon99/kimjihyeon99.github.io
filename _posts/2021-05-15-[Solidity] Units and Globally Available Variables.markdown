@@ -105,7 +105,7 @@ global namespaces에 항상 존재, 블록체인에 대한 정보를 제공하�
 |<address>.call(bytes memory) returns (bool, bytes memory)|주어진 payload로 low-level call를 발행하고, success condition과 return data를 반환 |
 |<address>.delegatecall(bytes memory) returns (bool, bytes memory)|주어진 payload로 low-level delegatecall 발행하고, success condition과 return data를 반환 |
 |<address>.staticcall(bytes memory) returns (bool, bytes memory)|주어진 payload로 low-level staticcall 발행하고, success condition과 return data를 반환 |
-
+aass
 
 #### Contract Related
 
