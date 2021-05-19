@@ -97,7 +97,7 @@ contract C {
 
 contract는 `new`키워드를 사용하여 다른 contract를 만들 수 있다.
 
-생성 중인 contract의 전체 코드는 생성한 contract가 컴파일 될 때 알아야하므로 재귀 생성-종속성이 불가능하다.
+생성 중인 contract의 전체 코드는 생성한 contract가 컴파일 될 때 알아야하므로 반복적인 생성-종속성이 불가능하다.
 
 ````solidity
 contract C {
@@ -116,6 +116,44 @@ contract C {
 }
 ````
 
+#### Salted contract creations / create2
+
+contract를 작성할 때, contract의 address는 contract의 작성 주소 및 각 contract의 작성에 따라 증가되는 counter로 부터 계산된다.
+
+1. 옵션 `salt(byte32)`를 지정하면 contract 작성 시 다른 메커니즘을 사용하여 new contract의 주소를 제공한다. 
+
+2. 특히 counter("nonce")는 사용되지 않는다. 이는 contract를 보다 유연하게 작성할 수 있다. 
+
+- 새로운 contract가 작성되기 전 새 contract의 주소를 파생할 수 있다. 
+- contract 작성 중 다른 contract를 작성하는 경우, 이 주소를 사용할 수 있다. 
+
+3. 주된 활용 사례는 off-chain interactions의 심판 역할을 하고, 분쟁이 있을 경우 만들면 된다.
+
+````solidity
+contract D {
+    uint public x;
+    constructor(uint a) {
+        x = a;
+    }
+}
+
+contract C {
+    function createDSalted(bytes32 salt, uint arg) public {
+        address predictedAddress = address(uint160(uint(keccak256(abi.encodePacked(
+            bytes1(0xff),
+            address(this),
+            salt, // 인자로 salt 추가 
+            keccak256(abi.encodePacked(
+                type(D).creationCode,
+                arg
+            ))
+        )))));
+
+        D d = new D{salt: salt}(arg); // salt 선언 
+        require(address(d) == predictedAddress);
+    }
+}
+````
 
 ### Order of Evaluation of Expressions
 
@@ -137,6 +175,7 @@ Solidity는 내부적으로 튜플 type을 사용하여 여러 값을 동시에 
 ````solidity
 contract C {
     function f() public pure returns (uint, bool, uint) {
+        //여러값 동시 반환
         return (7, true, 2);
     }
 
@@ -233,9 +272,9 @@ contract C {
 
 overflow 또는 underflow는 산술 연산의 결과 값이 제한되지 않은 정수로 실행될 때 결과 type의 범위를 벗어나는 상황
 
-Solidity 0.8.0 이전, 산술 연산은 추가 검사를 도입하는 라이브러리의 광범위한 사용으로 이어지는 과소 또는 오버플로의 경우, 항상 wrapping 되었다.
+Solidity 0.8.0 이전, 산술 연산은 추가 검사를 도입하는 라이브러리의 광범위한 사용으로 이어지는 과소 또는 오버플로의 경우, 항상 **wrapping** 되었다.
 
-Solidity 0.8.0 이후, 모든 산술 연산은 기본적으로 오버플로 및 언더플로우를 반복하기 때문에, 이러한 라이브러리를 사용할 필요가 없다.
+Solidity 0.8.0 이후, 모든 산술 연산은 기본적으로 오버플로 및 언더플로우를 반복하기 때문에, 이러한 **라이브러리를 사용할 필요가 없다**.
 
 이러한 동작을 얻기위해서, `Unchecked` 블록을 사용할 수 있다. 
 
@@ -252,7 +291,7 @@ contract C {
     }
 }
 ````
-`Unchecked` 블록은 block 내에서 어디서나 사용할 수 있지만, block 대체용도 사용은 불가능함
+`Unchecked` 블록은 block 내에서 어디서나 사용할 수 있지만, **block 대체용도 사용은 불가능**함
 
 setting은 block 내에 statement에만 영향 준다.
 
