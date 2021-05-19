@@ -137,7 +137,7 @@ PK에 대해 반복이 되는 그룹이 존재하지 않으므로 1차 정규형
 
 ### ✏ 40번
 
-<img src = https://user-images.githubusercontent.com/44187194/118853947-49e00c00-b90f-11eb-9b1c-f8d7e21dd85e.png width=350 height=700>
+<img src = https://user-images.githubusercontent.com/44187194/118853947-49e00c00-b90f-11eb-9b1c-f8d7e21dd85e.png width=700 height=350>
 
 
 #### 답: 1번
