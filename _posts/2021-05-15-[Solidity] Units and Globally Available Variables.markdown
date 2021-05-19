@@ -93,6 +93,32 @@ global namespaces에 항상 존재, 블록체인에 대한 정보를 제공하�
 |revert(string memory reason)|revert + 설명 문자열 제공|
 
 
+#### Mathematical and Cryptographic Functions
+
+|Function|description|
+|---|---|
+|addmod(uint x, uint y, uint k) returns (uint)|덧셈이 임의의 정확도로 수행되고, `2**256`에서 wrap이 되지 않을 때 (x+y)%k를 계산함|
+|mulmod(uint x, uint y, uint k) returns (uint)|곱셈이 임의의 정확도로 수행되고, `2**256`에서 wrap이 되지 않을 때 (x+y)%k를 계산함|
+|keccak256(bytes memory) returns (bytes32)|입력의 keccak256 해시를 계산함|
+|sha256(bytes memory) returns (bytes32)|입력의 sha256 해시를 계산함|
+|ripemd160(bytes memory) returns (bytes20)|입력의 ripemd160 해시를 계산함|
+|ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address)|elliptic curve signature에서 공개 키와 연결된 주소를 복구하거나 오류시 0을 반환함|
+
+*keccak256 해시 : Solidity에서 난수를 만들기 위한 함수
+
+*sha256 해시 : 256bit, 64자리 문자열 반환. 충돌로부터 비교적 안전하고 블록체인에서 가장 많이 사용함
+
+*ripemd160 해시 : 임의의 길이의 입력값을 160bit로 압축하는 암호화 해시함수 (비트코인 표준에서 사용)
+
+*ecrecover : 
+r = 첫 32바이트 서명
+s = 두 번째 32바이트 서명
+v= 최종 서명 1바이트
+
+`eccreover` 는 `address`를 반환하고 `address payable`은 반환하지 않는다. `transfer`해야하는 경우 타입변환을 해야함!
+
+
+
 #### Members of Address Types
 
 |Function|description|
@@ -105,7 +131,7 @@ global namespaces에 항상 존재, 블록체인에 대한 정보를 제공하�
 |<address>.call(bytes memory) returns (bool, bytes memory)|주어진 payload로 low-level call를 발행하고, success condition과 return data를 반환 |
 |<address>.delegatecall(bytes memory) returns (bool, bytes memory)|주어진 payload로 low-level delegatecall 발행하고, success condition과 return data를 반환 |
 |<address>.staticcall(bytes memory) returns (bool, bytes memory)|주어진 payload로 low-level staticcall 발행하고, success condition과 return data를 반환 |
-aass
+
 
 #### Contract Related
 
