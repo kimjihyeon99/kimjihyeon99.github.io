@@ -59,8 +59,44 @@ Solidity는 두가지 종류의 함수 호출(internal, external)이 있다.
 
 - `private`함수와 state variables은 오직 정의된 contract에 대해서만 표시된다.
 
+Visibillity을 나타내는 키워드의 위치는 state variable 유형 뒤에, function 매개변수 목록과 반환 매개변수 목록 사이에 제공된다. 
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.4.16 <0.9.0;
+
+contract C {
+    function f(uint a) private pure returns (uint b) { return a + 1; }
+    function setData(uint a) internal { data = a; }
+    uint public data;
+}
+````
+//추가 예시
 
 #### Getter Functions
+
+컴파일러는 모든 `public`변수에 대한 getter함수를 자동 생성한다. 
+
+어떠한 인자도 취하지 않고, unit를 반환하는 함수를 생성한다.
+
+state variables는 선언될 때 초기화 할 수 있다.
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.4.16 <0.9.0;
+
+contract C {
+    uint public data = 42;
+}
+
+contract Caller {
+    C c = new C();
+    function f() public view returns (uint) {
+        return c.data(); //getter 호출
+    }
+}
+````
+
 
 ### Function Modifiers
 
