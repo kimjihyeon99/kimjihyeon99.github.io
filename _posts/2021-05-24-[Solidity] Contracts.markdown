@@ -97,10 +97,134 @@ contract Caller {
 }
 ````
 
+단일 element만 검색할 수 있는 getter는 전체 array를 반환할때 높은 gas 비용을 방지하기 위해 존재함
+
+전체 array를 반환하기 위해서는 함수를 작성해야함
+
+````solidity
+contract arrayExample {
+    // public state variable
+    uint[] public myArray;
+
+    // 컴파일러에 의해 만들어진 getter
+    /*
+    function myArray(uint i) public view returns (uint) {
+        return myArray[i];
+    }
+    */
+
+    // 전체 array를 반환하는 function
+    function getArray() public view returns (uint[] memory) {
+        return myArray;
+    }
+}
+````
 
 ### Function Modifiers
 
+함수동작을 선언적으로 변경할 수 있다.
+
+예를들어, 함수를 실행하기 전에 자동적으로 조건을 확인하는 modifier를 사용할 수 있다. 
+
+상속가능한 속성이고, derived contract에 의해 재정의 될 수 있지만, `virtual`로 표시된 경우만 해당된다. 
+
+*자세한 내용은 Modifer Overriding 섹션에서
+
+예시코드)
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >0.7.0 <0.9.0;
+
+contract owned {
+    constructor() { owner = payable(msg.sender); }
+    address payable owner;
+
+    // derived된 contract에서 사용될 modifier임
+    // body에 `_;`선언 의미 : 
+    // owner가 onlyOwner를 부르면, 이 함수가실행되거나 그러지 않으면 예외처리가 된다. 
+    modifier onlyOwner {
+        require(
+            msg.sender == owner,
+            "Only owner can call this function."
+        );
+        _;
+    }
+}
+
+contract destructible is owned {//owned contract 상속
+    // destroy함수 적용, ??
+    function destroy() public onlyOwner {
+        selfdestruct(owner);
+    }
+}
+
+contract priced {
+    // modifier는 인자를 받을 수 있다.
+    modifier costs(uint price) {
+        if (msg.value >= price) {
+            _;
+        }
+    }
+}
+
+contract Register is priced, destructible {//priced, destructible 상속
+    mapping (address => bool) registeredAddresses;
+    uint price;
+
+    constructor(uint initialPrice) { price = initialPrice; }
+
+    //`payable`키워드를 붙이는게 중요함.
+    //그렇지 않으면, ehter를 전송할 수 없음!
+    function register() public payable costs(price) {
+        registeredAddresses[msg.sender] = true;
+    }
+
+    function changePrice(uint _price) public onlyOwner {
+        price = _price;
+    }
+}
+
+contract Mutex {
+    bool locked;
+    modifier noReentrancy() {
+        require(
+            !locked,
+            "Reentrant call."
+        );
+        locked = true;
+        _;
+        locked = false;
+    }
+
+    /// This function is protected by a mutex, which means that
+    /// reentrant calls from within `msg.sender.call` cannot call `f` again.
+    /// The `return 7` statement assigns 7 to the return value but still
+    /// executes the statement `locked = false` in the modifier.
+    function f() public noReentrancy returns (uint) {
+        (bool success,) = msg.sender.call("");
+        require(success);
+        return 7;
+    }
+}
+````
+
+- contract `C`에 정의된 modifier에 액세스하려면 `C.m`을 사용해 virtual 조회 없이 참조할 수 있다.
+- 현재 contract에 정의된 modifier만 사용할 수 있다. 
+- 라이브러리에도 정의될 수 있지만, 동일 라이브러리 함수로 제한된다.
+
+- 공백으로 구분된 리스트에서 여러개의 한정자를 지정하여 함수에 적용되며, 제시된 순서대로 평가된다.
+
+- modifier는 수정되는 함수의 인수와 반환값을 암시적으로 액세스하거나 변경할 수 없다. 
+
+- modifier 또는 function body로부터 명시적인 반환은 현재 modifier 또는 function body만 남는다.
+- 반환 변수가 할당 되고 앞의 modifier에서 _ 뒤의 제어흐름이 계속된다. 
+
+- 반환이 있는 modifier에서 명시적으로 반환된다. 
+
 ### Constant and Immutable State Variables
+
+
 
 #### Constant
 
