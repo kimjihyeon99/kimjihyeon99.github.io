@@ -222,23 +222,135 @@ contract Mutex {
 
 - 반환이 있는 modifier에서 명시적으로 반환된다. 
 
+- `_` 기호는 fucntion 본문으로 대체 된다.  
+
 ### Constant and Immutable State Variables
 
+State variables은 `constant` 또는 `immutable`로 선언될 수 있다. 
 
+- 두 경우 모두 contract 체결 후에는 변수를 수정할 수 없다.
+- `constant`의 경우, compile-time에 값을 고정해야하지만
+- `immutable`의 경우, 계약 체결 시간에 값을 할당할 수 있다.   
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.4;
+
+uint constant X = 32**22 + 8;
+
+contract C {
+    string constant TEXT = "abc";
+    bytes32 constant MY_HASH = keccak256("abc");
+    uint immutable decimals;
+    uint immutable maxBalance;
+    address immutable owner = msg.sender;
+
+    constructor(uint _decimals, address _reference) {
+        decimals = _decimals;
+        // immutable에 대한 할당은 환경에 액세스 가능함.
+        maxBalance = _reference.balance;
+    }
+
+    function isBalanceTooHigh(address _other) public view returns (bool) {
+        return _other.balance > maxBalance;
+    }
+}
+````
 
 #### Constant
 
+- 컴파일시 상수값이어야 하고, 변수가 선언된 위치에 할당되어야 한다. 
+- ??
+
 #### Immutable
 
+- `constant`로 선언된 것보다 덜 제한적임
+- contract의 생성자 또는 선언 시점에서 임의 값을 할당할 수 있다. 
+- 계약 체결동안 읽을 수 없고, 오직 한번만 할당할 수 있다. 
+
+- 컴파일러에 의해 생성된 contract 생성 코드는 `immutable`에 대한 모든 참조를 할당된 값으로 대체함으로써 반환되기전에 contract의 runtime 코드를 수정할 것이다. 
+- **컴파일러에서 생성된 런타임 코드**를 블록체인에 실제로 **저장된 런타임 코드**와 비교하는 것이 중요!
+
 ### Functions
+
+"free function"이라고 불리는 contract의 외부 함수는 항상 `internal`가시성을 포함하고 있다.
+
+??
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >0.7.0 <0.9.0;
+
+function sum(uint[] memory _arr) pure returns (uint s) {
+    for (uint i = 0; i < _arr.length; i++)
+        s += _arr[i];
+}
+
+contract ArrayExample {
+    bool found;
+    function f(uint[] memory _arr) public {
+        // This calls the free function internally.
+        // The compiler will add its code to the contract.
+        uint s = sum(_arr);
+        require(s >= 10);
+        found = true;
+    }
+}
+````
 
 #### Function Parameters and Return Variables
 
 ##### Function Parameters
 
+Function Parameters는 변수와 동일한 방식으로 선언되면, 사용되지 않은 매개변수의 이름은 생략 가능함 
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.4.16 <0.9.0;
+
+contract Simple {
+    uint sum;
+    function taker(uint _a, uint _b) public {
+        sum = _a + _b;
+    }
+}
+`````
+
+Function Parameters는 다른 local 변수로 사용할 수 있고, 할당될 수도 있다. 
+
 ##### Return Variables
 
+`returns`키워드 뒤에 동일한 구분으로 선언된다. 
+
+예시)  function parameters로 전달된 두개의 정수의 합과 곱을 반환
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.4.16 <0.9.0;
+
+contract Simple {
+    function arithmetic(uint _a, uint _b)
+        public
+        pure
+        returns (uint o_sum, uint o_product)
+    {
+        o_sum = _a + _b;
+        o_product = _a * _b;
+    }
+}
+````
+
+return variables의 이름은 생략가능하다.
+
+다른 local 변수로 사용될 수 있으며 기본값으로 초기화되며 재할당될 때까지 해당 값을 가진다. 
+
+명시적으로 할당한 다음 위와 같이 함수를 종료하거나 return문을 사용하여 반환 값을 직접 제공가능하다. 
+
 ##### Returning Multiple Values
+
+함수의 return 타입이 여러개인경우 `return(v0, v1, ..., vn)`을 사용하여 여러값을 반환할 수 있다. 
+
+단, return variable의 유형이 동일 해야하며, 암묵적 변환 후 해당 유형이 일치해야한다. 
 
 #### View Functions
 
