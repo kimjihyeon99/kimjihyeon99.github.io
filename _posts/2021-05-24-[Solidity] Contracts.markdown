@@ -706,13 +706,209 @@ contract PriceFeed is Owned, Destructible, Named("GoldFeed") {
 
 #### Function Overriding
 
+- 만약 기본 함수가 `virtual`로 표시된경우, 해당 동작을 변경하기 위해 contract를 상속하여 재정의 할 수 있다.
+- 그 후, 재정의 함수는 function header에서 `override`키워드를 사용해야 한다.
+- `external`가시성을 `public`으로만 변경가능
+-  `mutability`은 순서에 따라 더 strict한 것으로 변경될 수 있다. 
 
+: `non payable`은 `view`와 `pure`로 override될 수 있고,
+
+   `view`는 `pure`로 override될 수 있고,
+   
+   `payable`은 예외적으로 다른 mutability로 변경될 수 없다. 
+   
+````Solidity
+pragma solidity >=0.7.0 <0.9.0;
+
+contract Base
+{
+    function foo() virtual external view {}
+}
+
+contract Middle is Base {}
+
+contract Inherited is Middle
+{
+   //view -> pure
+    function foo() override public pure {}
+}
+`````
+
+동일한 함수를 정의하고, 아직 다른 기본 contract에 의해 override되지 않은 모든 기본 contract를 지정해야한다. 
+
+만약 contract가 여러 base contract 에서 동일한 기능을 상속받는 경우, 명시적으로 해야함
+
+예시코드)
+
+````Solidity
+contract Base1
+{
+    function foo() virtual public {}
+}
+
+contract Base2
+{
+    function foo() virtual public {}
+}
+
+contract Inherited is Base1, Base2
+{
+    // Derives from multiple bases defining foo(), so we must explicitly
+    // override it
+    function foo() public override(Base1, Base2) {}
+}
+````
+
+함수가 공통 base contract에 정의되어 있거나 이미 다른 모든 함수를 재정의하는 공통 base contract에 고유 function이 있는경우 
+
+명시적 지정자는 필요하지 않다.
+
+예시 코드)
+
+````Solidity
+contract A { function f() public pure{} }
+contract B is A {}
+contract C is A {}
+// No explicit override required
+contract D is B, C {}
+````
+
+> `private`가시성을 가진 function 은 `virtual`이 될 수 없다. 
+
+function의 매개변수와 반환 형식이 변수의 getter function과 일치할 경우
+
+public state variable가 external함수를 override 할 수 있다. (단, 자기자신을 override 할 수 없음)
+
+예시 코드)
+
+````Solidity
+contract A
+{
+    function f() external view virtual returns(uint) { return 5; }
+}
+
+contract B is A
+{
+    uint public override f;
+}
+````
 
 #### Modifier Overriding
 
+Function modifier는 서로 override할 수 있다. 
+
+이는 function oveeriding이랑 동일한 방식으로 동작한다. 
+
+- `virtual` 키워드는 override된 modifier에서만 사용되야함
+- `override` 키워드는 override 한 modifier에서만 사용되야함
+
+예시코드) 
+
+````Solidity
+pragma solidity >=0.6.0 <0.9.0;
+
+contract Base
+{
+    modifier foo() virtual {_;}
+}
+
+contract Inherited is Base
+{
+    modifier foo() override {_;}
+}
+````
+
+다중의 상속의 경우도, 지정자를 명시해주어야함
+
+````Solidity
+contract Base1
+{
+    modifier foo() virtual {_;}
+}
+
+contract Base2
+{
+    modifier foo() virtual {_;}
+}
+
+contract Inherited is Base1, Base2
+{
+    modifier foo() override(Base1, Base2) {_;}
+}
+````
+
 #### Constructors
 
+`Constructors`는 contract 작성시 실행되는 `생성자` 키워드로 선언된 선택적 함수, 초기화 코드 실행 가능함
+
+`생성자`가 실행된 후 contract의 최종 코드가 블록체인에 배포됨
+
+코드 배포에 따라 **코드** 길이의 에 선형으로 **추가 가스**가 발생함 
+
+코드는 모든 function과 function 호출을 통해 도달할 수 있는 모든 기능을 포함함
+
+단, `생성자` 코드 또는 `생성자`로부터 호출되는 internal 함수는 포함되지 않는다
+
+예시코드) 
+
+````Solidity
+pragma solidity >=0.7.0 <0.9.0;
+
+abstract contract A {
+    uint public a;
+     //생성자가 없으면 `constructor() {}`로 default값이 지정 
+    constructor(uint _a) {
+        a = _a;
+    }
+}
+
+contract B is A(1) {
+    constructor() {}
+}
+````
+
+`생성자`내부 매개변수를 사용할 수 있고, 이 경우 매개변수는 외부로부터 유효한 값을 할당할 수 없고
+
+derived된 contract의 `생성자`를 통해서만 할당되기 때문에 `abstract`를 표시해야한다. 
+
+> 주의 : 0.7.0 이전에 constructors의 가시성(internal or public)을 지정해야 했다
+
 #### Arguments for Base Constructors
+
+아래 설명된 linearization 규칙에 따라 모든 base contract의 `생성자`를 호출한다.
+
+인자가 있는경우, derived된 계약에서 인자가 모두 지정되어야한다. 두가지 방법으로 수행할 수 있다.
+
+예시코드)
+
+````Solidity
+pragma solidity >=0.7.0 <0.9.0;
+
+contract Base {
+    uint x;
+    constructor(uint _x) { x = _x; }
+}
+
+//1. directly specify in the inheritance list...
+contract Derived1 is Base(7) { 
+    constructor() {}
+}
+
+// 2. through a "modifier" of the derived constructor.
+contract Derived2 is Base { 
+    constructor(uint _y) Base(_y * _y) {}
+}
+````
+
+1. 상속목록에 직접 명시
+   인자가 상수이고, contract의 behaviour을 정의하거나 설명하는 경우 편리하다 
+
+2. 상속목록 또는 derived된 `생성자`의 modifier를 통해 상속
+   단, `생성자`인자가 derived된 contract의 인자에 의존할때 사용해야한다.
+
+두 방법을 동시에 사용하는 경우 error
+
+만약 derived contract가 base contract의 `생성자`에 대한 인자를 명시하지 않는다면, abstract contract일 것이다. 
 
 #### Multiple Inheritance and Linearization
 
