@@ -354,8 +354,43 @@ return variables의 이름은 생략가능하다.
 
 #### View Functions
 
+function은 상태를 수정하지 않겠다고 약속하는 경우 `view`로 선언될 수 있다. 
+
+다음 문장은 상태를 modify한다고 간주된다.
+
+- state variable에 쓰는 것
+- event를 보내는 것
+- 다른 contract를 생성하는 것
+- selfdestruct를 사용 하는 것
+- 호출을 통해 ether를 전송하는 것
+- view 또는 pure 로 mark되지 않은 함수를 호출하는 것
+- low-level 호출를 사용하는 것
+- 특정 opcode를 포함한 inline assembly 사용하는 것
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.5.0 <0.9.0;
+
+contract C {
+    function f(uint a, uint b) public view returns (uint) {
+        return a * (b + 42) + block.timestamp;
+    }
+}
+````
+
 #### Pure Functions
 
+function는 상태를 읽거나 수정하지 않겠다고 약속하는 경우 `pure` 로 선언될 수 있다.
+
+다음 문장은 상태로 부터 읽는 것으로 간주된다. 
+- state variable에서 읽는 것
+- address(this).balance or <address>.balance. 에 접근하는 것
+- block, tx, msg의 member 중 하나에 접근하는 것
+- pure 로 mark되지 않는 함수를 호출하는 것
+- 특정 opcode를 포함한 inline assembly 사용하는 것
+
+   
+   
 #### Receive Ether Function
 
 #### Fallback Function
