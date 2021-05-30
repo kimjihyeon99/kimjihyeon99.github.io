@@ -383,21 +383,125 @@ contract C {
 function는 상태를 읽거나 수정하지 않겠다고 약속하는 경우 `pure` 로 선언될 수 있다.
 
 다음 문장은 상태로 부터 읽는 것으로 간주된다. 
+
 - state variable에서 읽는 것
-- address(this).balance or <address>.balance. 에 접근하는 것
 - block, tx, msg의 member 중 하나에 접근하는 것
 - pure 로 mark되지 않는 함수를 호출하는 것
 - 특정 opcode를 포함한 inline assembly 사용하는 것
+- `address(this).balance` or `<address>.balance.` 에 접근하는 것
 
-   
-   
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.5.0 <0.9.0;
+
+contract C {
+    function f(uint a, uint b) public pure returns (uint) {
+        return a * (b + 42);
+    }
+}
+````   
+
+`pure`함수는 `revert()`와 `require()` 기능을 사용할 수 있다. 
+
+`STATICCALL opcode` 와 동일한 동작
+
 #### Receive Ether Function
+
+contract는 하나의 `receive` function을 가질 수 있다.
+
+선언식 : `receive() external payable { ... }`
+
+- `function`키워드 없음
+- arguments를 가지고 있지 않음
+- 어떤 것도 return 할 수 없음
+- `external` 가시성을 가져야하고, `payable` 상태를 가져야한다. 
+- `virtual`될 수 있고, override할 수 있고, modifier를 가질 수 있다. 
+
+동작 과정
+- 비어있는 calldata를 가진 contract 호출로 실행된다.
+- plain Ether transfers(`.send()` or `.transfer()`)로 수행된다.
+- 이러한 function이 없고, payable fallback function만 존재하면, 해당 함수가 plain Ether transfers를 호출한다. 
+- 두 함수 모두 없으면, contract는 정상적인 거래를 통해 ether를 receive할 수 없다. 
+
+receive function 은 이용가능한 2300 gas에만 의존할 수 있으므로, 기본 logging을 제외한 다른 작업을 수행할 공간이 없다. 
+
+다음작업은 2300 gas보다 더 많은 gas를 사용한다. 
+
+- storage 작성하는 것
+- contract 생성하는 것
+- 큰 양의 gas를 소비하는 external 함수 호출하는 것
+- ether를 전성하는 것
+
+`receive` 함수를 사용하는 예 
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.6.0 <0.9.0;
+
+//해당 contract는 ether가 보낸 모든 ether를 되돌릴 수 없는 상태로 유지함
+contract Sink {
+    event Received(address, uint);
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
+}
+````
 
 #### Fallback Function
 
 #### Function Overloading
 
+contract에는 이름이 같지만 매개변수 유형이 다른 여러 function이 포함될 수있다. => overloaging
+
+예시 코드) 
+
+contract A의 범위에서 함수 f의 overloading을 보여줌
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.4.16 <0.9.0;
+
+contract A {
+    function f(uint _in) public pure returns (uint out) {
+        out = _in;
+    }
+
+    function f(uint _in, bool _really) public pure returns (uint out) {
+        if (_really)
+            out = _in;
+    }
+}
+Ove
+````
+
+
 ##### Overload resolution and Argument matching
+
+Overloaded functions 는 function 호출에 제공된 인자와 현재 scope에 function 선언을 일치시켜 선택한다. 
+
+만약 모든 인자가 implicit 하게 예상 types으로 변환할 수 있으면, function은 overload 후보자로서 선택된다. 
+
+만약 후보가 정확히 하나가 아니면, resolution 은 실패함
+
+> return parameter는 overload resolution을 고려하지 않음
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.4.16 <0.9.0;
+
+contract A {
+    function f(uint8 _in) public pure returns (uint8 out) {
+        out = _in;
+    }
+
+    function f(uint256 _in) public pure returns (uint256 out) {
+        out = _in;
+    }
+}
+//f(50)을 호출하면, unit8 및 uint256 타입으로 암시적으로 변환할 수 있으므로, type error 발생함
+//하지만 uint256은 암시적으로 uint8로 변환할 수 없으므로, f(256)은 f(uint256)으로 해결할 수 있음
+````
 
 ### Events
 
