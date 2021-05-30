@@ -71,7 +71,6 @@ contract C {
     uint public data;
 }
 ````
-//추가 예시
 
 #### Getter Functions
 
@@ -260,7 +259,18 @@ contract C {
 #### Constant
 
 - 컴파일시 상수값이어야 하고, 변수가 선언된 위치에 할당되어야 한다. 
-- ??
+-  storage, blockchain data, execution data 에 액세스하거나 external contract를 호출하는 어떤 expression도 허용되지 않는다.
+- 메모리 할당에  side-effect가 있을 수 있는 Expression들은 허용되지만, 
+- 다른 메모리 object에 side-effect가 있을 수 있는 Expression들은 허용되지 않는다.
+- built-in functions은 허용된다.(keccak256는 예외- external contract를 호출하기 때문에)
+
+* 메모리 할당에 대한 side-effect가 허용되는 이유는 복잡한 object를 구성할 수 있어야하기 때문이다.
+
+** remind
+
+storage : block.timestamp, address(this).balance, block.number
+blockchain data : msg.value, gasleft()
+built-in function : keccak256, sha256, ripemd160, ecrecover, addmod, mulmod
 
 #### Immutable
 
@@ -275,7 +285,7 @@ contract C {
 
 "free function"이라고 불리는 contract의 외부 함수는 항상 `internal`가시성을 포함하고 있다.
 
-??
+다음 코드는 "free functions"을 호출하는 모든 contract를 포함한다.
 
 ````solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -289,8 +299,8 @@ function sum(uint[] memory _arr) pure returns (uint s) {
 contract ArrayExample {
     bool found;
     function f(uint[] memory _arr) public {
-        // This calls the free function internally.
-        // The compiler will add its code to the contract.
+        // internal하게 "free function"을 호출
+        // 컴파일러는 contract에 code를 추가함
         uint s = sum(_arr);
         require(s >= 10);
         found = true;
@@ -299,6 +309,8 @@ contract ArrayExample {
 ````
 
 #### Function Parameters and Return Variables
+
+function은 입력된 매개변수를 입력으로 사용하고, **임의 개수의 값을 출력으로 반환**할 수 있다.
 
 ##### Function Parameters
 
