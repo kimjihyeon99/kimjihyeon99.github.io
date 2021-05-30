@@ -912,7 +912,62 @@ contract Derived2 is Base {
 
 #### Multiple Inheritance and Linearization
 
+`다중상속`을 허용하는 언어는 여러문제를 처리해야한다.
+
+문제1. 다이아몬드
+
+ “C3 Linearization”를 사용하여 base class의 directed acyclic graph(DAG)에서 특정 순서를 강제한다는 점에서 **파이썬**과 유사하다.
+ 
+이는 바람직한  monotonicity의 속성을 가져오지만, 일부 상속 graph는 허용하지 않는다.
+
+특히, base class가 제공되는 순서는 중요하다.
+
+: "most base-like"에서 "most derived"순서로 나열해야한다.
+
+쉽게 설명하면, 서로 다른 contract에서 여러번 정의된 함수를 호출할 때, 주어진 base들을 오른쪽에서 왼쪽
+
+으로 깊이우선방식으로 검색하여 첫번째 일치에서 멈춘다. base contract를 이미 검색한 경우 skip한다.
+
+다음 코드는 "Linearization of inheritance graph impossible" error 발생한다.
+
+````Solidity
+pragma solidity >=0.4.0 <0.9.0;
+
+contract X {}
+contract A is X {}
+//error
+contract C is A, X {}
+````
+
+C가 X에게 A를 override하도록 요청하기 때문이다.
+
+하지만 A는 X를 override하도록요청하기 때문에 해결할 수 없는 모순이다.
+
+고유한 override 없이 여러 base에서 상속되는 함수를 명시적으로 override 해야하기 때문에 "C3 linearization" 는 그렇게 중요하지 않다.
+
+`생성자`는 인자가 상속 contract의 `생성자`에 제공되는 순서에 관계없이 항상 linearize된 순서로 실행된다.
+
+예시코드)
+
+````Solidity
+//  1 - Base2
+//  2 - Base1
+//  3 - Derived2
+contract Derived2 is Base2, Base1 {
+    constructor() Base2() Base1() {}
+}
+````
+
+
 #### Inheriting Different Kinds of Members of the Same Name
+
+상속으로 인해 contract의 다음 쌍 중 하나가 동일한 이름을 가진 경우 error
+
+- function 과 modifier
+- function 과 event
+- event 와 modifier
+
+> 예외적으로 state variable getter는 external 함수를 override할 수 있다.
 
 ### Abstract Contracts
 
