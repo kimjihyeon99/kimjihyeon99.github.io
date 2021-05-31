@@ -21,19 +21,48 @@ categories: solidity
 ### Creating Contracts
 
 - contract가 생성되면 해당 생성자가 한번 실행된다.
-- 생성자는 선택사항이고, 하나만 사용할 수 있으므로 overloading이 지원되지 않는다.
-- 생성자가 실행된 후, contract의 최종 코드가 블록체인에 저장됨
+- 생성자는 **선택사항**이고, 하나만 사용할 수 있으므로 overloading이 지원되지 않는다.
+- 생성자가 실행된 후, **contract의 최종 코드가 블록체인에 저장**됨
 - 코드에는 public 및 external function, 함수 호출을 통해 도달할 수있는 모든 함수가 포함되고, 생성자코드와 생성자에서 호출된 internal function만 포함되지 않는다.
 - contract에서 다른 contract를 작성하려면 작성된 contract의 소스코드를 creater에게 알려야한다. 
    -> 순환 생성 dependencies 가 불가능하다는 의미
-   
- // OwnedToken 코드 remix 실행방법??
+
+
+````Solidity
+contract OwnedToken {
+    //따로 TokenCreator 정의되어있음
+    TokenCreator creator; 
+    address owner;
+    bytes32 name;
+
+    //생성자, 지정된 이름과 creator 저장
+    constructor(bytes32 _name) {
+
+        //생성자에서는 함수가 아직 존재하지 않기 때문에 external로 함수에 액세스 불가능
+        owner = msg.sender;
+
+        //이 코드는 새로운 contract를 생성하지 않는다.
+        creator = TokenCreator(msg.sender);
+        name = _name;
+    }
+
+    function transfer(address newOwner) public {
+        //오직 현재 owner만 token을 transfer할 수 있다. 
+        if (msg.sender != owner) return;
+
+         //호출이 실패하면(가스 부족), 실행도 이곳에서 실패함
+        if (creator.isTokenTransferOK(owner, newOwner))
+            owner = newOwner;
+    }
+}
+
+````
 
 ### Visibillity and Getter
 
 Solidity는 두가지 종류의 함수 호출(internal, external)이 있다. 
 
-실제 EVM(=메시지) 호출을 생성하지 않는 internal호출, 이를 실행하는 external 호출
+실제 EVM 호출(=메시지 호출)을 생성하지 않는 internal호출, 이를 실행하는 external 호출
 
 따라서  functions 와 state variables에 대한 가시성이 있다.
 
@@ -41,18 +70,18 @@ Solidity는 두가지 종류의 함수 호출(internal, external)이 있다.
 `external`
 
 - contract interface의 일부, 다른 contract와 거래를 통해 호출될 수 있다. 
-- external 함수 f는 interal하게 호출할 수 없다. (f() 는 불가능, this.f()는 가능) 
+- external 함수 f는 **interal하게** 호출할 수 없다. (f() 는 불가능, this.f()는 가능) 
 
 `public`
 
-- contract interface의 일부, internal하게 또는 메시지를 통해 호출할 수 있다.
-- 자동 getter 함수가 생성된다. 
+- contract interface의 일부, **internal하게** 또는 메시지를 통해 호출할 수 있다.
+- **자동 getter 함수**가 생성된다. 
 
 
 `internal`
 
 - `this`를 사용하지 않고, functions 과 state variable 은 internal하게 액세스 할 수 있다. 
-- state variables의 default 가시성이다. 
+- **state variables**의 default 가시성이다. 
  
  
 `private`
@@ -63,12 +92,31 @@ Visibillity을 나타내는 키워드의 위치는 state variable 유형 뒤에,
 
 ````solidity
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.4.16 <0.9.0;
-
 contract C {
-    function f(uint a) private pure returns (uint b) { return a + 1; }
-    function setData(uint a) internal { data = a; }
-    uint public data;
+    uint private data;
+
+    function f(uint a) private pure returns(uint b) { return a + 1; }
+    function setData(uint a) public { data = a; }
+    function getData() public view returns(uint) { return data; }
+    function compute(uint a, uint b) internal pure returns (uint) { return a + b; }
+}
+
+// This will not compile
+contract D {
+    function readData() public {
+        C c = new C();
+        uint local = c.f(7); // error: member `f` is not visible
+        c.setData(3);
+        local = c.getData();
+        local = c.compute(3, 5); // error: member `compute` is not visible
+    }
+}
+
+contract E is C {
+    function g() public {
+        C c = new C();
+        uint val = compute(3, 5); // access to internal member (from derived to parent contract)
+    }
 }
 ````
 
@@ -123,9 +171,9 @@ contract arrayExample {
 
 함수동작을 선언적으로 변경할 수 있다.
 
-예를들어, 함수를 실행하기 전에 자동적으로 조건을 확인하는 modifier를 사용할 수 있다. 
+예를들어, 함수를 실행하기 전에 **자동적으로 조건을 확인**하는 modifier를 사용할 수 있다. 
 
-상속가능한 속성이고, derived contract에 의해 재정의 될 수 있지만, `virtual`로 표시된 경우만 해당된다. 
+상속가능한 속성이고, derived contract에 의해 override 될 수 있지만, `virtual`로 표시된 경우만 해당된다. 
 
 *자세한 내용은 Modifer Overriding 섹션에서
 
@@ -184,28 +232,6 @@ contract Register is priced, destructible {//priced, destructible 상속
     }
 }
 
-contract Mutex {
-    bool locked;
-    modifier noReentrancy() {
-        require(
-            !locked,
-            "Reentrant call."
-        );
-        locked = true;
-        _;
-        locked = false;
-    }
-
-    /// This function is protected by a mutex, which means that
-    /// reentrant calls from within `msg.sender.call` cannot call `f` again.
-    /// The `return 7` statement assigns 7 to the return value but still
-    /// executes the statement `locked = false` in the modifier.
-    function f() public noReentrancy returns (uint) {
-        (bool success,) = msg.sender.call("");
-        require(success);
-        return 7;
-    }
-}
 ````
 
 - contract `C`에 정의된 modifier에 액세스하려면 `C.m`을 사용해 virtual 조회 없이 참조할 수 있다.
@@ -223,11 +249,12 @@ contract Mutex {
 
 - `_` 기호는 fucntion 본문으로 대체 된다.  
 
+
 ### Constant and Immutable State Variables
 
 State variables은 `constant` 또는 `immutable`로 선언될 수 있다. 
 
-- 두 경우 모두 contract 체결 후에는 변수를 수정할 수 없다.
+- 두 경우 모두 **contract 체결 후에는 변수를 수정할 수 없다.**
 - `constant`의 경우, compile-time에 값을 고정해야하지만
 - `immutable`의 경우, 계약 체결 시간에 값을 할당할 수 있다.   
 
@@ -260,23 +287,26 @@ contract C {
 
 - 컴파일시 상수값이어야 하고, 변수가 선언된 위치에 할당되어야 한다. 
 -  storage, blockchain data, execution data 에 액세스하거나 external contract를 호출하는 어떤 expression도 허용되지 않는다.
-- 메모리 할당에  side-effect가 있을 수 있는 Expression들은 허용되지만, 
+- **메모리 할당**에  side-effect가 있을 수 있는 Expression들은 허용되지만, 
 - 다른 메모리 object에 side-effect가 있을 수 있는 Expression들은 허용되지 않는다.
-- built-in functions은 허용된다.(keccak256는 예외- external contract를 호출하기 때문에)
+- **built-in functions**은 허용된다.(keccak256는 예외- external contract를 호출하기 때문에)
 
 * 메모리 할당에 대한 side-effect가 허용되는 이유는 복잡한 object를 구성할 수 있어야하기 때문이다.
 
 ** remind
 
 storage : block.timestamp, address(this).balance, block.number
+
 blockchain data : msg.value, gasleft()
+
 built-in function : keccak256, sha256, ripemd160, ecrecover, addmod, mulmod
+
 
 #### Immutable
 
 - `constant`로 선언된 것보다 덜 제한적임
 - contract의 생성자 또는 선언 시점에서 임의 값을 할당할 수 있다. 
-- 계약 체결동안 읽을 수 없고, 오직 한번만 할당할 수 있다. 
+- 계약 체결동안 **읽을 수 없고, 오직 한번만 할당**할 수 있다. 
 
 - 컴파일러에 의해 생성된 contract 생성 코드는 `immutable`에 대한 모든 참조를 할당된 값으로 대체함으로써 반환되기전에 contract의 runtime 코드를 수정할 것이다. 
 - **컴파일러에서 생성된 런타임 코드**를 블록체인에 실제로 **저장된 런타임 코드**와 비교하는 것이 중요!
@@ -326,7 +356,7 @@ contract Simple {
         sum = _a + _b;
     }
 }
-`````
+````
 
 Function Parameters는 다른 local 변수로 사용할 수 있고, 할당될 수도 있다. 
 
@@ -346,17 +376,20 @@ contract Simple {
         pure
         returns (uint o_sum, uint o_product)
     {
+        //1
         o_sum = _a + _b;
         o_product = _a * _b;
+        //2
+        //return (_a + _b, _a * _b);
     }
 }
 ````
 
-return variables의 이름은 생략가능하다.
+return variables의 **이름은 생략가능**하다.
 
 다른 local 변수로 사용될 수 있으며 기본값으로 초기화되며 재할당될 때까지 해당 값을 가진다. 
 
-명시적으로 할당한 다음 위와 같이 함수를 종료하거나 return문을 사용하여 반환 값을 직접 제공가능하다. 
+명시적으로 할당한 다음, 위와 같이 함수를 종료하거나 return문을 사용하여 반환 값을 직접 제공가능하다. 
 
 ##### Returning Multiple Values
 
@@ -376,7 +409,7 @@ function은 상태를 수정하지 않겠다고 약속하는 경우 `view`로 �
 - selfdestruct를 사용 하는 것
 - 호출을 통해 ether를 전송하는 것
 - view 또는 pure 로 mark되지 않은 함수를 호출하는 것
-- low-level 호출를 사용하는 것
+- low-level 호출(call, callcode,delegatecall)를 사용하는 것
 - 특정 opcode를 포함한 inline assembly 사용하는 것
 
 ````solidity
@@ -416,7 +449,9 @@ contract C {
 
 `pure`함수는 `revert()`와 `require()` 기능을 사용할 수 있다. 
 
-`STATICCALL opcode` 와 동일한 동작
+`pure`와 `viwe`는 `STATICCALL opcode` 로 호출한다고 생각할 수 있다.
+
+* STATICCALL : EVM레벨에서 상태값이 바뀌지 않는걸 보장하기 위한것
 
 #### Receive Ether Function
 
@@ -462,6 +497,68 @@ contract Sink {
 
 #### Fallback Function
 
+선언식 : `fallback () external [payable]`
+         
+         fallback (bytes calldata _input) external [payable] returns (bytes memory _output)
+         
+- 이 함수는 `external`가시성을 가져야한다.
+- `virtual`될 수 있고, override할 수 있고, modifier를 가질 수 있다. 
+- 주어진 function signature와 일치하는 다른 function이 없거나,
+- receive Ether function이 없는 경우 contract에 대한 호출에서 실행된다. 
+- Ether를 receive하기 위해서 반드시 `payable`를 표시해야함
+
+- 만약 매개변수가 있는 함수를 사용할 경우, `_input`은 계약으로 전송된 전체데이터를 포함하며 `_output`으로 데이터를 반환할 수 있다.
+- 반환된 데이터는 ABI로 인코딩되지 않는다. 대신 modifications 없이 반환된다. 
+
+
+예시코드)
+
+````Solidity
+pragma solidity >=0.6.2 <0.9.0;
+
+contract Test {
+    //1.
+    fallback() external { x = 1; }
+    uint x;
+}
+
+contract TestPayable {
+    //1.[payable]
+    fallback() external payable { x = 1; y = msg.value; }
+    
+    receive() external payable { x = 2; y = msg.value; }
+    uint x;
+    uint y;
+}
+
+contract Caller {
+    function callTest(Test test) public returns (bool) {
+        (bool success,) = address(test).call(abi.encodeWithSignature("nonExistingFunction()"));
+        require(success);
+  
+        address payable testPayable = payable(address(test));
+
+         //누가 ether를 보내면, transfer는 fail 될 것이다. 
+        return testPayable.send(2 ether);
+    }
+
+    function callTestPayable(TestPayable test) public returns (bool) {
+        (bool success,) = address(test).call(abi.encodeWithSignature("nonExistingFunction()"));
+        require(success);
+        // results in test.x becoming == 1 and test.y becoming 0.
+        (success,) = address(test).call{value: 1}     (abi.encodeWithSignature("nonExistingFunction()"));
+        require(success);
+        // results in test.x becoming == 1 and test.y becoming 1.
+
+        (success,) = address(test).call{value: 2 ether}("");
+        require(success);
+         // results in test.x becoming == 2 and test.y becoming 2 ether.   
+        
+        return true;
+    }
+}
+````
+
 #### Function Overloading
 
 contract에는 이름이 같지만 매개변수 유형이 다른 여러 function이 포함될 수있다. => overloaging
@@ -484,7 +581,6 @@ contract A {
             out = _in;
     }
 }
-Ove
 ````
 
 
@@ -1131,7 +1227,37 @@ contract C {
 
 #### Function Signatures and Selectors in Libraries
 
+public 또는 external 라이브러리 function에 대한 external 호출이 가능하지만, 
+
+호출 규약은 일반 contract ABI 대해 지정된 것과 동일하지 않고 Solidity 내부로 간주된다.
+
+external 라이브러리 함수는 external contract 함수보다 더 많은 인자 유형을 지원한다. 
+
+이런 이유로, 4-byte selector 를 계산하는데 사용되는 함수 signatures는 internal naming 스키마를 따라 계산되며, 
+
+ABI contract에서 지원되지 않는 type의 인자는 internal 인코딩을 사용한다.
+
+**signature에서 type들을 위해 사용되는 indentifier**
+
+- Value type,  non-storage string, non-storage bytes는 contract ABI의 동일한 identifier사용한다.
+- Non-storage array types은 contract ABI의 동일한 규칙을 따른다.
+- Non-storage struct는 전체 name으로 참조된다.
+- Storage pointer mappings은 `mapping(<keyType> => <valueType>) storage`을 사용한다.
+- 다른 Strage pointer type들은 해당 non-storage type의 type 식별자를 사용한다.
+
+
+
 #### Call Protection For Libraries
+
+만약 libarary 코드가 DELEGATECALL 또는 CALLCODE 대신 CALL을 사용해 실행된다면, `view`나 `pure`함수가 호출되지 않는 한 revert 될것이다.
+
+EVM은 contract가 CALL을 사용하여 호출되었는지 감지할 수 있는 직접적인 방법은 제공하지 않지만,
+
+contract는 ADDRESS opcode를 사용하여 현재 실행중인 "위치"를 확인할 수 있다.
+
+생성된 코드는 이 address를 construction 시간에 사용된 address와 비교하여 호출모드를 결정한다.
+
+
 
 ### Using For
 
