@@ -726,7 +726,8 @@ contract TestToken {
 다형성을 포함한 다중 상속 지원
 
 - `virtual`이나 `override`키워드를 사용해서 명시적으로 사용하도록 설정해야함
-- contract가 다른 contract로부터 상속했을때, 하나의 contract만 blockchain에서 생성되고, 기본 contract 코드는 만들어진 contract로 컴파일 됨
+- `contract`가 다른 contract로부터 상속했을때, 오직 하나의 contract만 blockchain에서 생성되고, **모든 base contract의 코드가 생성된 contract으로 컴파일됨**
+- 즉, base contract의 함수에 대한 모든 internal 호출도 내부 함수 호출만 사용함
 - state variable shadowing은 error로 간주됨.
 - derived contract은 동일한 이름을 가진 state variable가 어디에도 없는 경우에만 선언할 수 있다.
 
@@ -1229,7 +1230,7 @@ contract C {
 
 public 또는 external 라이브러리 function에 대한 external 호출이 가능하지만, 
 
-호출 규약은 일반 contract ABI 대해 지정된 것과 동일하지 않고 Solidity 내부로 간주된다.
+**호출 규칙은 Solidity 내부에 있는것으로 간주되고, 일반 contract ABI 대해 지정된 것과 동일하지 않다. **
 
 external 라이브러리 함수는 external contract 함수보다 더 많은 인자 유형을 지원한다. 
 
@@ -1245,19 +1246,40 @@ ABI contract에서 지원되지 않는 type의 인자는 internal 인코딩을 �
 - Storage pointer mappings은 `mapping(<keyType> => <valueType>) storage`을 사용한다.
 - 다른 Strage pointer type들은 해당 non-storage type의 type 식별자를 사용한다.
 
+````Solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.5.14 <0.9.0;
 
+library L {
+    function f(uint256) external {}
+}
+
+contract C {
+    function g() public pure returns (bytes4) {
+        return L.f.selector;
+    }
+}
+````
 
 #### Call Protection For Libraries
 
 만약 libarary 코드가 DELEGATECALL 또는 CALLCODE 대신 CALL을 사용해 실행된다면, `view`나 `pure`함수가 호출되지 않는 한 revert 될것이다.
 
-EVM은 contract가 CALL을 사용하여 호출되었는지 감지할 수 있는 직접적인 방법은 제공하지 않지만,
+EVM은 contract가 `CALL`을 사용하여 호출되었는지 감지할 수 있는 직접적인 방법은 제공하지 않지만,
 
-contract는 ADDRESS opcode를 사용하여 현재 실행중인 "위치"를 확인할 수 있다.
+contract는 `ADDRESS` opcode를 사용하여 현재 실행중인 "위치"를 확인할 수 있다.
 
 생성된 코드는 이 address를 construction 시간에 사용된 address와 비교하여 호출모드를 결정한다.
 
+> 구체적 설명
 
+라이브러리의 runtime 코드는 항상 푸시 명령어로 시작하며 컴파일 시간에 20바이트의 0이다. 
+
+배포 코드가 실행되면이 상수는 **메모리**에서 현재 주소로 대체되고 이 수정 된 코드는 계약에 저장됩니다.
+
+이로 인해 runtime에 배포 시간 주소가 스택에 푸시되는 첫 번째 상수가되고 디스패처 코드는 현재 주소를  non-view  및 non-pure function에 대해 이 상수와 비교한다.
+
+이는 라이브러리의 체인에 저장된 실제코드가 컴파일러에 의해 `deployedBytecode`로 보고되는 코드와 다르다는 것을 의미한다. 
 
 ### Using For
 
