@@ -695,7 +695,39 @@ contract 작동 과정
 
 // 그림 만들기?
 
+#### Creating the signature
 
+A는 거래를 서명하기 위해 이더리움 네트워크와 상호 작용 할 필요가 없고, 프로세스는 완전히 offline 상태이다. 
+
+이 튜토리얼에서는 다른 많은 보안 이점을 제공하므로 **EIP-762**에 설명된 방법을 사용하여 web3.js 및 메타마스크를 사용하여 브라우저에 메시지를 서명한다.  
+
+````Solidity
+/// Hashing first makes things easier
+var hash = web3.utils.sha3("message to sign");
+web3.eth.personal.sign(hash, web3.eth.defaultAccount, function () { console.log("Signed"); });
+````
+
+> ` web3.eth.personal.sign`는 서명된 데이터에 메시지 길이를 더한다. 먼저 hash를 하기 때문에 메시지는 항상 32byte 길이이며, 따라서 이 길이 접두사는 항상 동일하다.
+
+
+#### What to Sign
+
+지불을 이행하는 contract의 경우, 서명된 메시지는 다음을 반드시 포함해야한다.
+    
+    1. 받는 사람의 주소
+    2. 전송되는 양
+    3. `replay attack(?)`에 대한 보호
+
+
+#### Packing arguments
+
+#### Recovering ther Message Signer in Solidity
+
+#### Extracting the Signature Parameters
+
+#### Computing the Message Hash
+
+#### The full contract
 
 ### Writing a Simple Payment Channel
 
