@@ -718,20 +718,151 @@ web3.eth.personal.sign(hash, web3.eth.defaultAccount, function () { console.log(
     2. 전송되는 양
     3. `replay attack(?)`에 대한 보호
 
+`replay attack` 
+
+- 서명된 메시지를 재사용하여 두번째 액션에 대한 인증을 청구하는 경우이다. 
+- 이를 피하기 위해 우리는 이더리움 트랜잭션 자체에서와 동일한 기술을 사용한다. -> `nonce`
+- `nonce`는 account가 전송하는 트랜잭션 수이다. smart contract에서는 `nonce`가 여러번 사용되는지 여부를 확인한다. 
+
+
+- 소유자가 `ReceiverPays` smart contract를 배포하고, 일부 결제를 한 다음, contract를 파기할때 다른 유형의 `replay attack`이 발생할 수 있다. 
+- 나중에 `RecipientPays` smart contract를 다시 배포하기로 결정하지만, 새 contract는 이전 배포에서 사용된 `nonce`를 알지 못하므로 공격자기 이전 메시지를 다시 사용할 수 있다. 
+
+
+- A는 메시지에 contract’s address를 포함 시킴으로써 이 공격에 대해 보호할 수 있고, contract 자체의 주소를 포함 하는 메시지만 수락된다. 
+- 마지막에 나오는 전체 contract의 `claimPayment()` 함수의 처음 두 줄에서 이런 예를 찾을 수 있다. 
+
 
 #### Packing arguments
 
+이제 서명된 메시지에 포함할 정보를 식별했으므로, 메시지를 함께 넣고 hash한 후 서명할 준비가 되었다.
+
+**단순성**을 위해 **데이터을 연결**한다.  
+
+- `ethereumjs-abi`library는 `soliditySHA3`라고 불리는 함수를 제공한다. 
+- `soliditySHA3` 는 Solidity’s `keccak256` 함수를 따라한다. 
+- ?? 어렵다 이부분
+
+````Solidity
+// recipient is the address that should be paid.
+// amount, in wei, specifies how much ether should be sent.
+// nonce can be any unique number to prevent replay attacks
+// contractAddress is used to prevent cross-contract replay attacks
+function signPayment(recipient, amount, nonce, contractAddress, callback) {
+    var hash = "0x" + abi.soliditySHA3(
+        ["address", "uint256", "uint256", "address"],
+        [recipient, amount, nonce, contractAddress]
+    ).toString("hex");
+
+    web3.eth.personal.sign(hash, web3.eth.defaultAccount, callback);
+}
+````
+
 #### Recovering ther Message Signer in Solidity
+
+일반적으로, ECDSA(?) signature는 두개의 인자 `r`, `s`로 구성되어있다. 
+
+이더리움에서 Signature는  메시지 서명에 사용된 계정의 개인 키를 확인하는 데 사용할 수 있는 3번째 매개변수 `v`와  트랜잭션의 sender가 포함된다. 
+
+Solidity 는 메시`r`,`s`인자와 `v`인자와 함께 메시지를 수신하고 메시지 서명에 사용된 주소를 반환하는  built-in function `ecrecover`를 제공한다. 
+
 
 #### Extracting the Signature Parameters
 
+web3.js에의해 생성된 서명은 `r`,`s`,`v`의 결합이므로 첫 번째 단계는 이러한 매개 변수를 분리하는 것이다.
+
+클라이언트 측에서 할 수 있지만, smart contract 내에서 할 경우 서명 매개변수를 3개만 보내면 된다. 
+
+바이트 배열을 그것의 구성 부분으로 나누는 것은 엉망이기 때문에, `splitSignature` 함수를 사용하기 위해  `inline assembly`를 사용한다. 
+
 #### Computing the Message Hash
+
+smart contract는 **어떤 매개 변수가 서명되었는지** 정확히 알아야 하므로 매개 변수에서 메시지를 재생성하여 서명 확인을 위해 사용해야한다. 
+
+`claimPayment`함수에서  `prefixed`, `recoverSigner` 함수를 사용한다. 
 
 #### The full contract
 
+````Solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
+contract ReceiverPays {
+    address owner = msg.sender;
+
+    mapping(uint256 => bool) usedNonces;
+
+    constructor() payable {}
+
+    function claimPayment(uint256 amount, uint256 nonce, bytes memory signature) public {
+        require(!usedNonces[nonce]);
+        usedNonces[nonce] = true;
+
+        // this recreates the message that was signed on the client
+        bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, nonce, this)));
+
+        require(recoverSigner(message, signature) == owner);
+
+        payable(msg.sender).transfer(amount);
+    }
+
+    /// destroy the contract and reclaim the leftover funds.
+    function shutdown() public {
+        require(msg.sender == owner);
+        selfdestruct(payable(msg.sender));
+    }
+
+    /// signature methods.
+    function splitSignature(bytes memory sig)
+        internal
+        pure
+        returns (uint8 v, bytes32 r, bytes32 s)
+    {
+        require(sig.length == 65);
+
+        assembly {
+            // first 32 bytes, after the length prefix.
+            r := mload(add(sig, 32))
+            // second 32 bytes.
+            s := mload(add(sig, 64))
+            // final byte (first byte of the next 32 bytes).
+            v := byte(0, mload(add(sig, 96)))
+        }
+
+        return (v, r, s);
+    }
+
+    function recoverSigner(bytes32 message, bytes memory sig)
+        internal
+        pure
+        returns (address)
+    {
+        (uint8 v, bytes32 r, bytes32 s) = splitSignature(sig);
+
+        return ecrecover(message, v, r, s);
+    }
+
+    /// builds a prefixed hash to mimic the behavior of eth_sign.
+    function prefixed(bytes32 hash) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+    }
+}
+````
+
 ### Writing a Simple Payment Channel
 
+#### What is a Payment Channel?
 
+#### Opening the Payment Channel
+
+#### Making Payments
+
+#### Closing the Payment Channel
+
+#### Channel Expiration
+
+#### The full contract
+
+#### Verifying Payments
 
 ## Modular Contracts
 
