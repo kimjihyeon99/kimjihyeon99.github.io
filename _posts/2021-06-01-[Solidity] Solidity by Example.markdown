@@ -348,12 +348,419 @@ contract SimpleAuction {
 - 암호화되지 않은 값을 전송하고 계약은 해시 값이 입찰 기간 동안 제공된 값과 동일한지 확인한다. 
 
 
+- 경매의 구속력과 블라인드를 동시에 만드는 방법이 또 다른 과제이다.
+- 경매에서 낙찰된 후 입찰자가 돈을 보내지 않는 것을 막을 수 있는 유일한 방법은 **입찰과 함께 돈을 보내도록 하는 것**이다. 
+- 이더리움에서는 value transfers을 블라인드 할 수 없기 때문에 **누구나 가치를 볼 수 있다**. 
+
+
+- 다음 예는 최고 입찰액보다 큰 값을 수락함으로써 이문제를 해결한다. 
+- 공개 단꼐에서만 확인할 수 있기 때문에 일부 입찰은 무효일 수 있으며, 이는 고의적인것이다. 
+- 입찰자들은 여러개의 높은 혹은 낮은 무효 입찰을 함으로써 경쟁을 혼란스럽게 할 수 있다.
+
+````Solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.4;
+contract BlindAuction {
+    struct Bid {
+        bytes32 blindedBid;
+        uint deposit;
+    }
+
+    address payable public beneficiary;
+    uint public biddingEnd;
+    uint public revealEnd;
+    bool public ended;
+
+    mapping(address => Bid[]) public bids;
+
+    address public highestBidder;
+    uint public highestBid;
+
+    // Allowed withdrawals of previous bids
+    mapping(address => uint) pendingReturns;
+
+    event AuctionEnded(address winner, uint highestBid);
+
+    // Errors that describe failures.
+
+    /// The function has been called too early.
+    /// Try again at `time`.
+    error TooEarly(uint time);
+    /// The function has been called too late.
+    /// It cannot be called after `time`.
+    error TooLate(uint time);
+    /// The function auctionEnd has already been called.
+    error AuctionEndAlreadyCalled();
+
+    // Modifiers are a convenient way to validate inputs to
+    // functions. `onlyBefore` is applied to `bid` below:
+    // The new function body is the modifier's body where
+    // `_` is replaced by the old function body.
+    modifier onlyBefore(uint _time) {
+        if (block.timestamp >= _time) revert TooLate(_time);
+        _;
+    }
+    modifier onlyAfter(uint _time) {
+        if (block.timestamp <= _time) revert TooEarly(_time);
+        _;
+    }
+
+    constructor(
+        uint _biddingTime,
+        uint _revealTime,
+        address payable _beneficiary
+    ) {
+        beneficiary = _beneficiary;
+        biddingEnd = block.timestamp + _biddingTime;
+        revealEnd = biddingEnd + _revealTime;
+    }
+
+    /// Place a blinded bid with `_blindedBid` =
+    /// keccak256(abi.encodePacked(value, fake, secret)).
+    /// The sent ether is only refunded if the bid is correctly
+    /// revealed in the revealing phase. The bid is valid if the
+    /// ether sent together with the bid is at least "value" and
+    /// "fake" is not true. Setting "fake" to true and sending
+    /// not the exact amount are ways to hide the real bid but
+    /// still make the required deposit. The same address can
+    /// place multiple bids.
+    function bid(bytes32 _blindedBid)
+        public
+        payable
+        onlyBefore(biddingEnd)
+    {
+        bids[msg.sender].push(Bid({
+            blindedBid: _blindedBid,
+            deposit: msg.value
+        }));
+    }
+
+    /// Reveal your blinded bids. You will get a refund for all
+    /// correctly blinded invalid bids and for all bids except for
+    /// the totally highest.
+    function reveal(
+        uint[] memory _values,
+        bool[] memory _fake,
+        bytes32[] memory _secret
+    )
+        public
+        onlyAfter(biddingEnd)
+        onlyBefore(revealEnd)
+    {
+        uint length = bids[msg.sender].length;
+        require(_values.length == length);
+        require(_fake.length == length);
+        require(_secret.length == length);
+
+        uint refund;
+        for (uint i = 0; i < length; i++) {
+            Bid storage bidToCheck = bids[msg.sender][i];
+            (uint value, bool fake, bytes32 secret) =
+                    (_values[i], _fake[i], _secret[i]);
+            if (bidToCheck.blindedBid != keccak256(abi.encodePacked(value, fake, secret))) {
+                // Bid was not actually revealed.
+                // Do not refund deposit.
+                continue;
+            }
+            refund += bidToCheck.deposit;
+            if (!fake && bidToCheck.deposit >= value) {
+                if (placeBid(msg.sender, value))
+                    refund -= value;
+            }
+            // Make it impossible for the sender to re-claim
+            // the same deposit.
+            bidToCheck.blindedBid = bytes32(0);
+        }
+        payable(msg.sender).transfer(refund);
+    }
+
+    /// Withdraw a bid that was overbid.
+    function withdraw() public {
+        uint amount = pendingReturns[msg.sender];
+        if (amount > 0) {
+            // It is important to set this to zero because the recipient
+            // can call this function again as part of the receiving call
+            // before `transfer` returns (see the remark above about
+            // conditions -> effects -> interaction).
+            pendingReturns[msg.sender] = 0;
+
+            payable(msg.sender).transfer(amount);
+        }
+    }
+
+    /// End the auction and send the highest bid
+    /// to the beneficiary.
+    function auctionEnd()
+        public
+        onlyAfter(revealEnd)
+    {
+        if (ended) revert AuctionEndAlreadyCalled();
+        emit AuctionEnded(highestBidder, highestBid);
+        ended = true;
+        beneficiary.transfer(highestBid);
+    }
+
+    // This is an "internal" function which means that it
+    // can only be called from the contract itself (or from
+    // derived contracts).
+    function placeBid(address bidder, uint value) internal
+            returns (bool success)
+    {
+        if (value <= highestBid) {
+            return false;
+        }
+        if (highestBidder != address(0)) {
+            // Refund the previously highest bidder.
+            pendingReturns[highestBidder] += highestBid;
+        }
+        highestBid = value;
+        highestBidder = bidder;
+        return true;
+    }
+}
+````
+
 ## Safe Remote Purchase
+
+원격으로 상품을 구매하려면 서로를 신뢰해야 하는 여러 당사자가 필요하다.
+
+가장 간단한 구성은 seller와 buyer를 포함한다. 
+
+buyer는 seller로부터 아이템을 받고자 하며 seller는 그 대가로 돈을 받고자 한다.
+
+여기서 문제가 되는 부분은 배송이다. 물건이 buyer에게 도착했는지 확인할 방법이 없다. 
+
+
+이 문제를 해결할 수 있는방법
+
+- 다음 예에서, buyer와 seller는 contract에서 조건부 날인 증서 항목 가치의 두배를 contract에 넣어야한다. 
+- 그 후, buyer가 물건을 받았다는 것을 확인할 때까지 돈은 계약서 안에 lock 되어 있을 것이다. 
+- 그 후, buyer는 예금의 절반(예금/2)을 돌려받게 되고, seller는 예금 절반의 3배(예금+가치)를 얻게 된다. 
+- 이면의 idea는 buyer와 seller가 상황을 해결할 동기를 가지고 있거나 그렇지 않으면 그들의 돈이 영원히 lock되어있다는 것이다.
+
+이 contract는 문제를 해결하지는 않지만, contract내에서  state machine과 같은 구조를 사용할 수 있는 방법에 대한 계요를 제공한다. 
+
+
+````Solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.4;
+contract Purchase {
+    uint public value;
+    address payable public seller;
+    address payable public buyer;
+
+    enum State { Created, Locked, Release, Inactive }
+    // The state variable has a default value of the first member, `State.created`
+    State public state;
+
+    modifier condition(bool _condition) {
+        require(_condition);
+        _;
+    }
+
+    /// Only the buyer can call this function.
+    error OnlyBuyer();
+    /// Only the seller can call this function.
+    error OnlySeller();
+    /// The function cannot be called at the current state.
+    error InvalidState();
+    /// The provided value has to be even.
+    error ValueNotEven();
+
+    modifier onlyBuyer() {
+        if (msg.sender != buyer)
+            revert OnlyBuyer();
+        _;
+    }
+
+    modifier onlySeller() {
+        if (msg.sender != seller)
+            revert OnlySeller();
+        _;
+    }
+
+    modifier inState(State _state) {
+        if (state != _state)
+            revert InvalidState();
+        _;
+    }
+
+    event Aborted();
+    event PurchaseConfirmed();
+    event ItemReceived();
+    event SellerRefunded();
+
+    // Ensure that `msg.value` is an even number.
+    // Division will truncate if it is an odd number.
+    // Check via multiplication that it wasn't an odd number.
+    constructor() payable {
+        seller = payable(msg.sender);
+        value = msg.value / 2;
+        if ((2 * value) != msg.value)
+            revert ValueNotEven();
+    }
+
+    /// Abort the purchase and reclaim the ether.
+    /// Can only be called by the seller before
+    /// the contract is locked.
+    function abort()
+        public
+        onlySeller
+        inState(State.Created)
+    {
+        emit Aborted();
+        state = State.Inactive;
+        // We use transfer here directly. It is
+        // reentrancy-safe, because it is the
+        // last call in this function and we
+        // already changed the state.
+        seller.transfer(address(this).balance);
+    }
+
+    /// Confirm the purchase as buyer.
+    /// Transaction has to include `2 * value` ether.
+    /// The ether will be locked until confirmReceived
+    /// is called.
+    function confirmPurchase()
+        public
+        inState(State.Created)
+        condition(msg.value == (2 * value))
+        payable
+    {
+        emit PurchaseConfirmed();
+        buyer = payable(msg.sender);
+        state = State.Locked;
+    }
+
+    /// Confirm that you (the buyer) received the item.
+    /// This will release the locked ether.
+    function confirmReceived()
+        public
+        onlyBuyer
+        inState(State.Locked)
+    {
+        emit ItemReceived();
+        // It is important to change the state first because
+        // otherwise, the contracts called using `send` below
+        // can call in again here.
+        state = State.Release;
+
+        buyer.transfer(value);
+    }
+
+    /// This function refunds the seller, i.e.
+    /// pays back the locked funds of the seller.
+    function refundSeller()
+        public
+        onlySeller
+        inState(State.Release)
+    {
+        emit SellerRefunded();
+        // It is important to change the state first because
+        // otherwise, the contracts called using `send` below
+        // can call in again here.
+        state = State.Inactive;
+
+        seller.transfer(3 * value);
+    }
+}
+````
 
 ## Micropayment Channel
 
+결제 채널의 예시 구현을 구축하는 방법에 대해 알아보자.
+
+암호화 서명을 사용하여 동일한 당사자 갇에 보안적이고 즉각적인 트랜잭션 수수료 없이 Ether를 반복적으로 전송한다. 
+
+예를들어, 서명 및 확인 방법을 이해하고 결제 채널을 설정해야한다. 
+
+
 ### Creating and verifying signatures
+
+A는 일정양의 Ether를 B에게 보내려고 한다. **A : 보낸 사람 B: 받는 사람**
+
+A는 암호로 서명된 메시지 off-chain(예: 이메일)을 B에게 보내고, 이는 수표 작성과 비슷하다. 
+
+A와 B는 서명을 이용해 거래를 승인하는데, 이는 이더리움에서 smart contract로 가능하다.
+
+A는 Ether를 전송할 수 있는 간단한 smart contract를 만들지만, 결제를 시작하기 위해 직접 함수를 호출하는 대신  B가 이를 수행하도록 하여 거래 수수료를 지불 한다. 
+
+contract 작동 과정
+
+1. A는 `ReceiverPays` contract를 배포하고, 지불을 처리할 수 있는 충분한 Ether를 첨부한다.
+2. A는 개인 키로 메시지에 서명함으로 써 지불을 승인하낟. 
+3. A는 암호로 서명된 메시지를 B에게 보낸다. 
+4. 메시지는 비밀로 유지할 필요가 없으므로, 메시지를 보내는 메커니즘에는 문제가 없다. 
+5. B는 서명된 메시지를 smart contract에 제시하여 지불을 청구하고, 메시지의 진위를 확인한 다음 자금을 방출한다? 해제한다?. 
+
+// 그림 만들기?
+
+
 
 ### Writing a Simple Payment Channel
 
+
+
 ## Modular Contracts
+
+contract를 만들기 위한 **모듈식 접근 방법**은 복잡성을 줄이고 가독성을 향상시켜
+
+개발 및 검토 중에 버그와 취약성을 식별하는데 도움이 된다.
+
+동작이나 각 모듈을 개별적으로 지정하고 제어하는 경우, 고려해야 할 상호작용은 contract의 다른 모든 이동이 아닌 **모듈 사양 간의 상호작용** 이다.
+
+
+아래 예시에서 contract는 `Balances` libarary의 `move` 메소드를 사용하여 주소간에 전송된 잔액이 예상한 값과 일치하는 지 확인한다. 
+
+`Balances` libarary는 accounts의 balances를 적절하게 추적하는 독립된 component를 제공한다. 
+
+`Balances` libarary는 절대 마이너스 잔액 또는 오버플로를 만들지 않고, 모든 잔액의 합계는 contract기간동안 변하지 않는다.
+
+````Solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.5.0 <0.9.0;
+
+library Balances {
+    function move(mapping(address => uint256) storage balances, address from, address to, uint amount) internal {
+        require(balances[from] >= amount);
+        require(balances[to] + amount >= balances[to]);
+        balances[from] -= amount;
+        balances[to] += amount;
+    }
+}
+
+contract Token {
+    mapping(address => uint256) balances;
+    using Balances for *;
+    mapping(address => mapping (address => uint256)) allowed;
+
+    event Transfer(address from, address to, uint amount);
+    event Approval(address owner, address spender, uint amount);
+
+    function transfer(address to, uint amount) public returns (bool success) {
+        balances.move(msg.sender, to, amount);
+        emit Transfer(msg.sender, to, amount);
+        return true;
+
+    }
+
+    function transferFrom(address from, address to, uint amount) public returns (bool success) {
+        require(allowed[from][msg.sender] >= amount);
+        allowed[from][msg.sender] -= amount;
+        balances.move(from, to, amount);
+        emit Transfer(from, to, amount);
+        return true;
+    }
+
+    function approve(address spender, uint tokens) public returns (bool success) {
+        require(allowed[msg.sender][spender] == 0, "");
+        allowed[msg.sender][spender] = tokens;
+        emit Approval(msg.sender, spender, tokens);
+        return true;
+    }
+
+    function balanceOf(address tokenOwner) public view returns (uint balance) {
+        return balances[tokenOwner];
+    }
+}
+````
