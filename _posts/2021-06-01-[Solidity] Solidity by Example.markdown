@@ -180,6 +180,12 @@ contract Ballot {
 
 ## Blind Auction
 
+이더리움에서 완전 블라인드 경매 contract을 만드는 것은 쉽다. 
+
+누구나 입찰을 볼 수 있는 **공개 경매**, 입찰기간이 끝날 때까지 실제 입찰을 볼 수 없는 **블라인드 경매**가 있다. 
+
+### Simple Open Auction
+
 일반적인 생각은 입찰기간 동안 누구나 입찰을 보낼 수 있다는 것이다.
 
 입찰에는 입찰자들을 입찰에 묶기 위해 돈을 보내는 것이 이미 포함되어있다. 
@@ -188,9 +194,159 @@ contract Ballot {
 
 입찰기간이 종료된 후 수익자가 돈을 받으려면 수동으로 계약을 호출해야 하므로 계약이 스스로 활성화 될 수 없다. 
 
-### Simple Open Auction
+````Solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.4;
+contract SimpleAuction {
+    // Parameters of the auction. Times are either
+    // absolute unix timestamps (seconds since 1970-01-01)
+    // or time periods in seconds.
+    address payable public beneficiary;
+    uint public auctionEndTime;
+
+    // Current state of the auction.
+    address public highestBidder;
+    uint public highestBid;
+
+    // Allowed withdrawals of previous bids
+    mapping(address => uint) pendingReturns;
+
+    // Set to true at the end, disallows any change.
+    // By default initialized to `false`.
+    bool ended;
+
+    // Events that will be emitted on changes.
+    event HighestBidIncreased(address bidder, uint amount);
+    event AuctionEnded(address winner, uint amount);
+
+    // Errors that describe failures.
+
+    // The triple-slash comments are so-called natspec
+    // comments. They will be shown when the user
+    // is asked to confirm a transaction or
+    // when an error is displayed.
+
+    /// The auction has already ended.
+    error AuctionAlreadyEnded();
+    /// There is already a higher or equal bid.
+    error BidNotHighEnough(uint highestBid);
+    /// The auction has not ended yet.
+    error AuctionNotYetEnded();
+    /// The function auctionEnd has already been called.
+    error AuctionEndAlreadyCalled();
+
+    /// Create a simple auction with `_biddingTime`
+    /// seconds bidding time on behalf of the
+    /// beneficiary address `_beneficiary`.
+    constructor(
+        uint _biddingTime,
+        address payable _beneficiary
+    ) {
+        beneficiary = _beneficiary;
+        auctionEndTime = block.timestamp + _biddingTime;
+    }
+
+    /// Bid on the auction with the value sent
+    /// together with this transaction.
+    /// The value will only be refunded if the
+    /// auction is not won.
+    function bid() public payable {
+        // No arguments are necessary, all
+        // information is already part of
+        // the transaction. The keyword payable
+        // is required for the function to
+        // be able to receive Ether.
+
+        // Revert the call if the bidding
+        // period is over.
+        if (block.timestamp > auctionEndTime)
+            revert AuctionAlreadyEnded();
+
+        // If the bid is not higher, send the
+        // money back (the revert statement
+        // will revert all changes in this
+        // function execution including
+        // it having received the money).
+        if (msg.value <= highestBid)
+            revert BidNotHighEnough(highestBid);
+
+        if (highestBid != 0) {
+            // Sending back the money by simply using
+            // highestBidder.send(highestBid) is a security risk
+            // because it could execute an untrusted contract.
+            // It is always safer to let the recipients
+            // withdraw their money themselves.
+            pendingReturns[highestBidder] += highestBid;
+        }
+        highestBidder = msg.sender;
+        highestBid = msg.value;
+        emit HighestBidIncreased(msg.sender, msg.value);
+    }
+
+    /// Withdraw a bid that was overbid.
+    function withdraw() public returns (bool) {
+        uint amount = pendingReturns[msg.sender];
+        if (amount > 0) {
+            // It is important to set this to zero because the recipient
+            // can call this function again as part of the receiving call
+            // before `send` returns.
+            pendingReturns[msg.sender] = 0;
+
+            if (!payable(msg.sender).send(amount)) {
+                // No need to call throw here, just reset the amount owing
+                pendingReturns[msg.sender] = amount;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /// End the auction and send the highest bid
+    /// to the beneficiary.
+    function auctionEnd() public {
+        // It is a good guideline to structure functions that interact
+        // with other contracts (i.e. they call functions or send Ether)
+        // into three phases:
+        // 1. checking conditions
+        // 2. performing actions (potentially changing conditions)
+        // 3. interacting with other contracts
+        // If these phases are mixed up, the other contract could call
+        // back into the current contract and modify the state or cause
+        // effects (ether payout) to be performed multiple times.
+        // If functions called internally include interaction with external
+        // contracts, they also have to be considered interaction with
+        // external contracts.
+
+        // 1. Conditions
+        if (block.timestamp < auctionEndTime)
+            revert AuctionNotYetEnded();
+        if (ended)
+            revert AuctionEndAlreadyCalled();
+
+        // 2. Effects
+        ended = true;
+        emit AuctionEnded(highestBidder, highestBid);
+
+        // 3. Interaction
+        beneficiary.transfer(highestBid);
+    }
+}
+````
 
 ### Blind Auction
+
+공개 경매는 블라인드 경매로 확장된다.
+
+블라인드 경매의 장점은 입찰기간이 끝날 때 까지 시간 압박이 없다는 점이다.
+
+투명한 컴퓨팅 플랫폼에 블라인드 경매를 만드는 것은 모순처럼 들릴 수 있지만 암호화가 구조를 가져다 준다.
+
+
+- 입찰 기간 동안, 입찰자는 실제로 입찰을 보내지 않고 단지 그것의 해시된 버전만 보낸다.
+- 현재 해시 값이 동일한 두 개의 값을 찾는 것은 현실적으로 불가능 하다고 간주되기 때문에, 입찰자는 그것에 의해 입찰에 응한다.
+- 입찰 기간이 끝나면 입찰자는 입찰 내용을 공개해야 한다.
+- 암호화되지 않은 값을 전송하고 계약은 해시 값이 입찰 기간 동안 제공된 값과 동일한지 확인한다. 
+
 
 ## Safe Remote Purchase
 
