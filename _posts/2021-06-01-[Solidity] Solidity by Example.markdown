@@ -740,8 +740,9 @@ web3.eth.personal.sign(hash, web3.eth.defaultAccount, function () { console.log(
 **단순성**을 위해 **데이터을 연결**한다.  
 
 - `ethereumjs-abi`library는 `soliditySHA3`라고 불리는 함수를 제공한다. 
-- `soliditySHA3` 는 Solidity’s `keccak256` 함수를 따라한다. 
-- ?? 어렵다 이부분
+- `soliditySHA3` 는 `abi.encodePacked`에 사용하는 인코딩된 인자에 적용된 Solidity’s `keccak256` 함수를 따라한다. 
+- 다음 예는 `ReceiverPays`를 위해 적절한 서명을 만드는 js 함수 이다. 
+
 
 ````Solidity
 // recipient is the address that should be paid.
@@ -870,6 +871,7 @@ A와 B 사이의 간단한 단방향 결제 채널을 알아 볼 것 이다.
 
 
 > Note
+> 
 > 1,3 단계는 이더리움 transaction을 요구하고, 2는 보낸 사람이 암호화 서명된 메시지를 오프체인 방법을 통해 수신자에게 전송하는 것을 의미한다. 
 > 즉, 임의 수의 전송을 지원하기 위해 두 개의 트랜잭션만 필요하다.
 
@@ -1076,6 +1078,7 @@ contract SimplePaymentChannel {
 ````
 
 > Note
+> 
 > `splitSignature`함수는 모든 보안 체크에 사용하지 않는다. 
 
 #### Verifying Payments
