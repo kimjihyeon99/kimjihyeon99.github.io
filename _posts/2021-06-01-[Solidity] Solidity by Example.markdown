@@ -869,19 +869,263 @@ A와 B 사이의 간단한 단방향 결제 채널을 알아 볼 것 이다.
 3. B는 payment 채널을 "close"하고 자신의 이더리움 부분을 인출하고 나머지 부분을 보낸사람에게 보낸다. 
 
 
-B는 smart contract로 ether를 서명 날인 하고, 유효
+> Note
+> 1,3 단계는 이더리움 transaction을 요구하고, 2는 보낸 사람이 암호화 서명된 메시지를 오프체인 방법을 통해 수신자에게 전송하는 것을 의미한다. 
+> 즉, 임의 수의 전송을 지원하기 위해 두 개의 트랜잭션만 필요하다.
+
+
+B는 smart contract로 ether를 서명 날인 하고, 유효한 서명된 메시지를 존중하기 때문에 자금을 받을 수 있다. 
+
+smart contract는 또한 시간 제한을 적용하므로 A는 수신자가 채널 폐쇄를 거부하더라도 결국 자금을 회수할 수 있다. 
+
+얼마나 오래 열어 둘지 결정하는 것은 payment 채널의 참가자에게 달려있다. 
+
+네트워크 액세스 1분마다 인터넷 카페에 지불하는 등 단기 거래의 경우 payment 채널이 제한된 기간동안 열려 있을 수 있다.
+
+반면 직원에게 시급과 같은 반복적인 지급에 대해서는 수개월 또는 수년간 개방할 수 있다. 
 
 #### Opening the Payment Channel
 
+payment 채널을 열기 위해서, A는 서명날인된 Ether를 를 연결하고 의도된 수신자와 채널이 존재하는 최대 기간을 지정하는  smart contract를 배포한다. 
+
+마지막에 나오는 contract의 간편결제 채널 기능이다. 
+
 #### Making Payments
+
+A는 **서명된 메시지**를 B에게 보냄으로써 payments를 만든다. 
+
+이 단계는 완전히 이더리움 네트워크의 외부에서 수행된다.
+
+**메시지**는 발신인에 의해 암호로 서명된 다음 수신인에게 직접 전송된다.
+
+각 **메시지**는 다음 정보를 포함한다.
+
+    - cross-contract replay attacks을 방지하는데 사용되는, smart contract의 주소
+    - 지금까지 수신자에게 지불해야 하는 총 Ether 양
+
+일련의 transfer가 끝나면, payment 채널은 한번만 닫힌다.
+
+이 때문에, 보낸 메시지 중 오직 하나만 사용된다. 
+
+이런 이유로, 각 메시지는 개별 소액결제의 금액이 아니라 Ether의 누적 총 금액을 지정한다. 
+
+수신자는 당연히 가장 최근의 메시지가 총합계가 높은 메시지이기 때문에, **가장 최근의 메시지를 상환**하도록 선택할 것입니다.
+
+smart contract는 단 하나의 메시지만을 받아들이기 때문에, 메시지 당 임시 값은 더 이상 필요하지 않다. 
+
+smart contract의 주소는 하나의 payment 채널을 위한 메시지가 다른 채널에 사용되는 것을 방지하기 위해 사용된다.
+
+
+이전 섹션의 메시지에 암호화 방식으로 서명하기 위해 수정된 js 코드
+
+````Solidity
+function constructPaymentMessage(contractAddress, amount) {
+    return abi.soliditySHA3(
+        ["address", "uint256"],
+        [contractAddress, amount]
+    );
+}
+
+function signMessage(message, callback) {
+    web3.eth.personal.sign(
+        "0x" + message.toString("hex"),
+        web3.eth.defaultAccount,
+        callback
+    );
+}
+
+// contractAddress is used to prevent cross-contract replay attacks.
+// amount, in wei, specifies how much Ether should be sent.
+
+function signPayment(contractAddress, amount, callback) {
+    var message = constructPaymentMessage(contractAddress, amount);
+    signMessage(message, callback);
+}
+````
 
 #### Closing the Payment Channel
 
+B가 그의 자금을 받을 준비가 되었을때, smart contract의 `close`를 호출해 payment를 close 할 시간다. 
+
+채널을 닫으면, 수신자에게 ether를 지급하고, contract를 파기하여 남은 ether를 A에게 돌려 보낸다. 
+
+채널을 닫으려면, B는 A가 서명한 메시지를 제공해야한다. 
+
+
+smart contract에서는 **메시지에 보낸사람의 서명이 포함되어 있는지** 확인해야 한다. 
+
+확인을 수행하는 프로세스는 수신인이 사용하는 프로세스와 동일하다. 
+
+Solidity 함수는 `ValidSignature` 및 `recoverySigner` 작업이며 ,`ReceiverPays` contract에서 빌린 함수도 있다.
+
+오직 payment 채널 수신자만 `close`함수를 호출할 수 있고,  이 기능은 **가장 최근의 결제 메시지**를 자연스럽게 전달하며, 그 메시지는 가장 높은 총액을 전달하기 때문이다. 
+
+만약 sender가 이 함수 호출 할 수 있을 떄, 그들은 더 적은 액수의 메시지를 제공하고 **수신자를 속여 빚진 것을 빼앗을 수 있다**.
+
+
+함수는 서명된 메시지가 지정된 매개 변수와 일치하는지 확인한다.
+
+모든 것이 확인되면 수신인은 **이더넷의 일부를 전송받고**, 나머지 수신인은 자동 소멸을 통해 전송된다.
+
+전체 계약에서 `close` 기능을 볼 수 있다.
+
 #### Channel Expiration
+
+B는 언제는지 payment 채널을 닫을 수 있지만, 그렇게 하지 못하면 A는 적립된 자금을 회수할 방법이 필요하다.
+
+만료시간은 contract 배포시 설정되었다. 그 시간이 되면 A는 자금을 회수하기 위해 `claimTimeout` 를 호출할 수 있다.
+
+ `claimTimeout` 함수는 **full contract** 에서 볼 수 있다. 
+ 
+ 
+이 함수가 호출된 후에 B는 더 이상 Ether를 수신할 수 없으므로, Expiration에 도달하기 전에 채널을 닫는 것이 중요하다.
+
 
 #### The full contract
 
+````Solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
+contract SimplePaymentChannel {
+    address payable public sender;      // The account sending payments.
+    address payable public recipient;   // The account receiving the payments.
+    uint256 public expiration;  // Timeout in case the recipient never closes.
+
+    constructor (address payable _recipient, uint256 duration)
+        payable
+    {
+        sender = payable(msg.sender);
+        recipient = _recipient;
+        expiration = block.timestamp + duration;
+    }
+
+    /// the recipient can close the channel at any time by presenting a
+    /// signed amount from the sender. the recipient will be sent that amount,
+    /// and the remainder will go back to the sender
+    function close(uint256 amount, bytes memory signature) public {
+        require(msg.sender == recipient);
+        require(isValidSignature(amount, signature));
+
+        recipient.transfer(amount);
+        selfdestruct(sender);
+    }
+
+    /// the sender can extend the expiration at any time
+    function extend(uint256 newExpiration) public {
+        require(msg.sender == sender);
+        require(newExpiration > expiration);
+
+        expiration = newExpiration;
+    }
+
+    /// if the timeout is reached without the recipient closing the channel,
+    /// then the Ether is released back to the sender.
+    function claimTimeout() public {
+        require(block.timestamp >= expiration);
+        selfdestruct(sender);
+    }
+
+    function isValidSignature(uint256 amount, bytes memory signature)
+        internal
+        view
+        returns (bool)
+    {
+        bytes32 message = prefixed(keccak256(abi.encodePacked(this, amount)));
+
+        // check that the signature is from the payment sender
+        return recoverSigner(message, signature) == sender;
+    }
+
+    /// All functions below this are just taken from the chapter
+    /// 'creating and verifying signatures' chapter.
+
+    function splitSignature(bytes memory sig)
+        internal
+        pure
+        returns (uint8 v, bytes32 r, bytes32 s)
+    {
+        require(sig.length == 65);
+
+        assembly {
+            // first 32 bytes, after the length prefix
+            r := mload(add(sig, 32))
+            // second 32 bytes
+            s := mload(add(sig, 64))
+            // final byte (first byte of the next 32 bytes)
+            v := byte(0, mload(add(sig, 96)))
+        }
+
+        return (v, r, s);
+    }
+
+    function recoverSigner(bytes32 message, bytes memory sig)
+        internal
+        pure
+        returns (address)
+    {
+        (uint8 v, bytes32 r, bytes32 s) = splitSignature(sig);
+
+        return ecrecover(message, v, r, s);
+    }
+
+    /// builds a prefixed hash to mimic the behavior of eth_sign.
+    function prefixed(bytes32 hash) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+    }
+}
+````
+
+> Note
+> `splitSignature`함수는 모든 보안 체크에 사용하지 않는다. 
+
 #### Verifying Payments
+
+이전 섹션에서와 달리, payment 채널에서 메시지는 바로 전송되지 않는다.
+
+수신자는 최신 메시지를 추적하여, payment 채널을 닫을 때 다시 작성한다.
+
+즉, 수신인이 각 메시지에 대해 자체 검증을 수행하는 것이 중요하다.
+
+그렇지 않으면 수신자가 돈을 받을 수 있다는 보장이 없다. 
+
+
+수신자는 각 메시지를 다음과 같은 과정으로 검증해야한다.
+
+1. 메시지에 contract address가 payment 채널과 같은지 검증
+2. 새로운 총 금액이 예상한 금액과 같은지 검증
+3. 새로운 총 금액이 조건부 날인 증서(escrowed) 된 Ether의 양을 초과하지 않는지 검증
+4. 서명이 유효한지, payment 채널의 sender로부터 온것인지 검증
+
+
+이 검증을 작성하기 위해 ethereumjs-util 라이브러리를 사용할 것이다.
+
+마지막 단계는 여러가지 방법으로 수행할 수 있고, js를 사용한다.
+
+다음 코드는 위의 서명 js코드에서 `constructMessage`함수를 빌린다.
+
+````Solidity
+// this mimics the prefixing behavior of the eth_sign JSON-RPC method.
+function prefixed(hash) {
+    return ethereumjs.ABI.soliditySHA3(
+        ["string", "bytes32"],
+        ["\x19Ethereum Signed Message:\n32", hash]
+    );
+}
+
+function recoverSigner(message, signature) {
+    var split = ethereumjs.Util.fromRpcSig(signature);
+    var publicKey = ethereumjs.Util.ecrecover(message, split.v, split.r, split.s);
+    var signer = ethereumjs.Util.pubToAddress(publicKey).toString("hex");
+    return signer;
+}
+
+function isValidSignature(contractAddress, amount, signature, expectedSigner) {
+    var message = prefixed(constructPaymentMessage(contractAddress, amount));
+    var signer = recoverSigner(message, signature);
+    return signer.toLowerCase() ==
+        ethereumjs.Util.stripHexPrefix(expectedSigner).toLowerCase();
+}
+````
 
 ## Modular Contracts
 
