@@ -850,7 +850,26 @@ contract ReceiverPays {
 
 ### Writing a Simple Payment Channel
 
+A는 이제 간편하지만 완전한 결제 채널 구현을 만든다. 
+
+결제 채널은 암호화 서명을 사용하여 거래 수수료 없이 즉각적으로 안전하게 Ether를 반복적으로 전송한다. 
+
 #### What is a Payment Channel?
+
+결제 채널의 참여자들이 트랜잭션을 사용하지 않고도 Ether를 반복적으로 전송할 수 있도록 한다. 
+
+즉, 트랜잭션과 관련된 지연 및 수수료를 피할 수 있다. 
+
+A와 B 사이의 간단한 단방향 결제 채널을 알아 볼 것 이다. 
+
+세가지 단계가 포함된다
+
+1. A는 Ether와 smart contract를 체결한다. 그럼 payment 채널이 "open"된다. 
+2. A는 Ether가 받는 사람에게 얼마나 지불해야하는지 지정하는 메시지에 서명한다. 이 단계는 각 지불에 대해 반복된다.
+3. B는 payment 채널을 "close"하고 자신의 이더리움 부분을 인출하고 나머지 부분을 보낸사람에게 보낸다. 
+
+
+B는 smart contract로 ether를 서명 날인 하고, 유효
 
 #### Opening the Payment Channel
 
