@@ -36,7 +36,7 @@ contract Ballot {
         uint vote;   // index of the voted proposal
     }
 
-    // This is a type for a single proposal.
+    //하나의 제안에 대한 type
     struct Proposal {
         bytes32 name;   // short name (up to 32 bytes)
         uint voteCount; // number of accumulated votes
@@ -44,25 +44,20 @@ contract Ballot {
 
     address public chairperson;
 
-    // This declares a state variable that
-    // stores a `Voter` struct for each possible address.
+    // 각각의 가능한 주소에  `Voter` struct를 저장하는  state variable을 선언한다.
     mapping(address => Voter) public voters;
 
-    // A dynamically-sized array of `Proposal` structs.
+    // `Proposal` structs의 동적 사이즈 배열 
     Proposal[] public proposals;
 
-    /// Create a new ballot to choose one of `proposalNames`.
+    /// 새 투표용지를 만들어 'proposalNames' 중 하나를 선택한다.
     constructor(bytes32[] memory proposalNames) {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
 
-        // For each of the provided proposal names,
-        // create a new proposal object and add it
-        // to the end of the array.
+        // 각각의 proposal names에 대해서,
+        // 새로운 'Proposal'를 만들고, 배열 끝에 추가한다.
         for (uint i = 0; i < proposalNames.length; i++) {
-            // `Proposal({...})` creates a temporary
-            // Proposal object and `proposals.push(...)`
-            // appends it to the end of `proposals`.
             proposals.push(Proposal({
                 name: proposalNames[i],
                 voteCount: 0
@@ -70,8 +65,9 @@ contract Ballot {
         }
     }
 
-    // Give `voter` the right to vote on this ballot.
-    // May only be called by `chairperson`.
+   
+    // '투표자'에게 이 투표권을 준다.
+    // `chairperson`만 이 함수를 호출 할 수 있다. 
     function giveRightToVote(address voter) public {
         // If the first argument of `require` evaluates
         // to `false`, execution terminates and all
@@ -83,6 +79,7 @@ contract Ballot {
         // functions are called correctly.
         // As a second argument, you can also provide an
         // explanation about what went wrong.
+        //
         require(
             msg.sender == chairperson,
             "Only chairperson can give right to vote."
