@@ -173,34 +173,31 @@ contract Ballot {
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.4;
 contract SimpleAuction {
-    // Parameters of the auction. Times are either
-    // absolute unix timestamps (seconds since 1970-01-01)
-    // or time periods in seconds.
+    // 경매의 파라미터 
+    // Time은 absolute unix timestamps 또는 시간간격(초)을 나타냄 
     address payable public beneficiary;
     uint public auctionEndTime;
 
-    // Current state of the auction.
+    // 경매의 현재 상태
     address public highestBidder;
     uint public highestBid;
 
     // Allowed withdrawals of previous bids
+    // 이전 입찰의 철회 허용
     mapping(address => uint) pendingReturns;
 
-    // Set to true at the end, disallows any change.
-    // By default initialized to `false`.
+    // 마지막에 'true'로 설정되면, 변경이 허용되지 않음
+    // default 값 false
     bool ended;
 
-    // Events that will be emitted on changes.
+    // 변경시에 전송될 event이다. 
     event HighestBidIncreased(address bidder, uint amount);
     event AuctionEnded(address winner, uint amount);
 
-    // Errors that describe failures.
+    // 실패를 설명하는 Errors
 
-    // The triple-slash comments are so-called natspec
-    // comments. They will be shown when the user
-    // is asked to confirm a transaction or
-    // when an error is displayed.
-
+    // 슬래시 세개로 표시되어있는 것들은  트랜잭션 확인을 요청하거나 오류가 표시될 때 표시된다.
+    
     /// The auction has already ended.
     error AuctionAlreadyEnded();
     /// There is already a higher or equal bid.
@@ -210,9 +207,7 @@ contract SimpleAuction {
     /// The function auctionEnd has already been called.
     error AuctionEndAlreadyCalled();
 
-    /// Create a simple auction with `_biddingTime`
-    /// seconds bidding time on behalf of the
-    /// beneficiary address `_beneficiary`.
+    /// 낙찰자 주소 '_beneficiary'를 대신하여 `_biddingTime`초 입찰 시간을 가진 간단한 auction을 생성한다. 
     constructor(
         uint _biddingTime,
         address payable _beneficiary
@@ -220,11 +215,9 @@ contract SimpleAuction {
         beneficiary = _beneficiary;
         auctionEndTime = block.timestamp + _biddingTime;
     }
-
-    /// Bid on the auction with the value sent
-    /// together with this transaction.
-    /// The value will only be refunded if the
-    /// auction is not won.
+    
+    // transaction과 같이 보낸 값과 경매에 입찰함
+    // 경매에 낙찰되지 않은 경우, 그 값은 환불된다.  
     function bid() public payable {
         // No arguments are necessary, all
         // information is already part of
@@ -232,25 +225,17 @@ contract SimpleAuction {
         // is required for the function to
         // be able to receive Ether.
 
-        // Revert the call if the bidding
-        // period is over.
+        // 입찰 기간을 넘어서면 revert를 호출한다. 
         if (block.timestamp > auctionEndTime)
             revert AuctionAlreadyEnded();
 
-        // If the bid is not higher, send the
-        // money back (the revert statement
-        // will revert all changes in this
-        // function execution including
-        // it having received the money).
+        // 입찰가격이 낮아 낙찰되지 않은 경우 revert를 호출한다. 
         if (msg.value <= highestBid)
             revert BidNotHighEnough(highestBid);
 
         if (highestBid != 0) {
-            // Sending back the money by simply using
-            // highestBidder.send(highestBid) is a security risk
-            // because it could execute an untrusted contract.
-            // It is always safer to let the recipients
-            // withdraw their money themselves.
+            // 단순히 'highestBidder.send(highestBid)'를 사용해 돈을 돌려 보내는 것은 보안상 위험이 있다. 
+            // 수령인이 직접 돈을 인출하도록 하는 것이 항상 안전하다. 
             pendingReturns[highestBidder] += highestBid;
         }
         highestBidder = msg.sender;
@@ -258,17 +243,15 @@ contract SimpleAuction {
         emit HighestBidIncreased(msg.sender, msg.value);
     }
 
-    /// Withdraw a bid that was overbid.
+    /// 너무 많이 입찰된 경우 철회 하는 함수
     function withdraw() public returns (bool) {
         uint amount = pendingReturns[msg.sender];
-        if (amount > 0) {
-            // It is important to set this to zero because the recipient
-            // can call this function again as part of the receiving call
-            // before `send` returns.
+        if (amount > 0) {    
+            // 수신자가 'send'를 반환하기 전에 receiving call의 일부로 이 함수를 다시호출 할 수 있기때문에 0으로 설정하는 것이 중요하다.
             pendingReturns[msg.sender] = 0;
 
             if (!payable(msg.sender).send(amount)) {
-                // No need to call throw here, just reset the amount owing
+                // 여기서 throw할 필요없이 아래금액만 재설정하면 된다.
                 pendingReturns[msg.sender] = amount;
                 return false;
             }
@@ -276,21 +259,17 @@ contract SimpleAuction {
         return true;
     }
 
-    /// End the auction and send the highest bid
-    /// to the beneficiary.
+    // 경매를 끝내고 최고 낙찰가를을 낙찰자에게 보낸다. 
     function auctionEnd() public {
         // It is a good guideline to structure functions that interact
         // with other contracts (i.e. they call functions or send Ether)
         // into three phases:
-        // 1. checking conditions
-        // 2. performing actions (potentially changing conditions)
-        // 3. interacting with other contracts
-        // If these phases are mixed up, the other contract could call
-        // back into the current contract and modify the state or cause
-        // effects (ether payout) to be performed multiple times.
-        // If functions called internally include interaction with external
-        // contracts, they also have to be considered interaction with
-        // external contracts.
+        // 1. 조건 체크하기 
+        // 2. 경매 수행하기
+        // 3. 다른 contract와 거래
+        
+        // 이 단계가 섞이면, 다른 contract에서는 현재 contract를 다시 체결하여 여러번 수행될 상태나 결과를 수정할 수 있다.  
+        // 내부적으로 호출되는 함수가 외부 contract와 상호작용 하는경우 고려해보아야한다. 
 
         // 1. Conditions
         if (block.timestamp < auctionEndTime)
@@ -328,8 +307,8 @@ contract SimpleAuction {
 - 이더리움에서는 value transfers을 블라인드 할 수 없기 때문에 **누구나 가치를 볼 수 있다**. 
 
 
-- 다음 예는 최고 입찰액보다 큰 값을 수락함으로써 이문제를 해결한다. 
-- 공개 단꼐에서만 확인할 수 있기 때문에 일부 입찰은 무효일 수 있으며, 이는 고의적인것이다. 
+- 다음 예는 **최고 입찰액보다 큰 값을 수락함**으로써 이문제를 해결한다. 
+- 공개 단계에서만 확인할 수 있기 때문에 일부 입찰은 무효일 수 있으며, 이는 고의적인것이다. 
 - 입찰자들은 여러개의 높은 혹은 낮은 무효 입찰을 함으로써 경쟁을 혼란스럽게 할 수 있다.
 
 ````Solidity
@@ -358,19 +337,15 @@ contract BlindAuction {
 
     // Errors that describe failures.
 
-    /// The function has been called too early.
-    /// Try again at `time`.
+    /// 함수가 너무 일찍 호출된경우 'time'이후에 다시시도
     error TooEarly(uint time);
-    /// The function has been called too late.
-    /// It cannot be called after `time`.
+    ///  함수가 너무 늦게 호출된경우 'time'이후에 호출되지 못함
     error TooLate(uint time);
-    /// The function auctionEnd has already been called.
+    /// 'auctionEnd' 함수가 이미 불린 경우
     error AuctionEndAlreadyCalled();
 
-    // Modifiers are a convenient way to validate inputs to
-    // functions. `onlyBefore` is applied to `bid` below:
-    // The new function body is the modifier's body where
-    // `_` is replaced by the old function body.
+    // Modifiers는 입력을 검증하는 편리한 방법임!
+    // 새로운 함수의 body는 old body에 의해 대체된 '_'가 있는 modifier의 body이다.
     modifier onlyBefore(uint _time) {
         if (block.timestamp >= _time) revert TooLate(_time);
         _;
@@ -379,7 +354,7 @@ contract BlindAuction {
         if (block.timestamp <= _time) revert TooEarly(_time);
         _;
     }
-
+    
     constructor(
         uint _biddingTime,
         uint _revealTime,
@@ -390,8 +365,7 @@ contract BlindAuction {
         revealEnd = biddingEnd + _revealTime;
     }
 
-    /// Place a blinded bid with `_blindedBid` =
-    /// keccak256(abi.encodePacked(value, fake, secret)).
+  
     /// The sent ether is only refunded if the bid is correctly
     /// revealed in the revealing phase. The bid is valid if the
     /// ether sent together with the bid is at least "value" and
@@ -399,6 +373,12 @@ contract BlindAuction {
     /// not the exact amount are ways to hide the real bid but
     /// still make the required deposit. The same address can
     /// place multiple bids.
+    
+    /// `_blindedBid` = keccak256(abi.encodePacked(value, fake, secret)) 로 블라인드 입찰로 둔다.
+    // 입찰이 the revealing phase에서 정확히 드러난 경우에만 send ether가 환불된다. 
+    // 입찰과 함께 보낸 ether가 적어도 "value"이고 "false"가 참이 아닐 경우 입찰은 유효하다.
+    // "fake"를 참으로 설정하고 정확한 금액을 보내지 않은 경우, 실제 입찰을 숨기면서도 필요한 예금을 하는 방식이다. 
+    // 동일한 주소로 다수의 입찰로 둔다. 
     function bid(bytes32 _blindedBid)
         public
         payable
@@ -410,9 +390,8 @@ contract BlindAuction {
         }));
     }
 
-    /// Reveal your blinded bids. You will get a refund for all
-    /// correctly blinded invalid bids and for all bids except for
-    /// the totally highest.
+    // blind 된 나의 입찰을 드러내는 함수
+    // 올바르게 blind 처리된 모든 무효 입찰과 가장 높은 입찰을 제외한 모든 입찰에 대해 환불된다. 
     function reveal(
         uint[] memory _values,
         bool[] memory _fake,
@@ -433,8 +412,7 @@ contract BlindAuction {
             (uint value, bool fake, bytes32 secret) =
                     (_values[i], _fake[i], _secret[i]);
             if (bidToCheck.blindedBid != keccak256(abi.encodePacked(value, fake, secret))) {
-                // Bid was not actually revealed.
-                // Do not refund deposit.
+                // 입찰은 실제로 밝혀지지 않은 경우, 예금을 환불하지 않는다. 
                 continue;
             }
             refund += bidToCheck.deposit;
@@ -442,8 +420,7 @@ contract BlindAuction {
                 if (placeBid(msg.sender, value))
                     refund -= value;
             }
-            // Make it impossible for the sender to re-claim
-            // the same deposit.
+            // sender가 동일한 보증금을 재청구 할 수 없도로 한다.
             bidToCheck.blindedBid = bytes32(0);
         }
         payable(msg.sender).transfer(refund);
@@ -453,18 +430,14 @@ contract BlindAuction {
     function withdraw() public {
         uint amount = pendingReturns[msg.sender];
         if (amount > 0) {
-            // It is important to set this to zero because the recipient
-            // can call this function again as part of the receiving call
-            // before `transfer` returns (see the remark above about
-            // conditions -> effects -> interaction).
+            // 0으로 설정하는게 중요함(위 설명과 중복)
             pendingReturns[msg.sender] = 0;
 
             payable(msg.sender).transfer(amount);
         }
     }
 
-    /// End the auction and send the highest bid
-    /// to the beneficiary.
+    // 설명 중복
     function auctionEnd()
         public
         onlyAfter(revealEnd)
@@ -475,9 +448,7 @@ contract BlindAuction {
         beneficiary.transfer(highestBid);
     }
 
-    // This is an "internal" function which means that it
-    // can only be called from the contract itself (or from
-    // derived contracts).
+    // "internal" 함수 
     function placeBid(address bidder, uint value) internal
             returns (bool success)
     {
@@ -485,7 +456,7 @@ contract BlindAuction {
             return false;
         }
         if (highestBidder != address(0)) {
-            // Refund the previously highest bidder.
+            // 이전에 가장 높은 입찰자에게 환불한다. 
             pendingReturns[highestBidder] += highestBid;
         }
         highestBid = value;
