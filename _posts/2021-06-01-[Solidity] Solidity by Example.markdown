@@ -36,7 +36,7 @@ contract Ballot {
         uint vote;   // index of the voted proposal
     }
 
-    //하나의 제안에 대한 type
+    //하나의 Proposal에 대한 type
     struct Proposal {
         bytes32 name;   // short name (up to 32 bytes)
         uint voteCount; // number of accumulated votes
@@ -66,20 +66,13 @@ contract Ballot {
     }
 
    
-    // '투표자'에게 이 투표권을 준다.
+    // 'voter'에게 이 투표권을 준다.
     // `chairperson`만 이 함수를 호출 할 수 있다. 
     function giveRightToVote(address voter) public {
-        // If the first argument of `require` evaluates
-        // to `false`, execution terminates and all
-        // changes to the state and to Ether balances
-        // are reverted.
-        // This used to consume all gas in old EVM versions, but
-        // not anymore.
-        // It is often a good idea to use `require` to check if
-        // functions are called correctly.
-        // As a second argument, you can also provide an
-        // explanation about what went wrong.
-        //
+        // 'require'의 첫번째 인자로 'false'로 되면 실행이 종료되고, 상태 및 Ether 잔액에 대한 모든 변경사항은 revert 된다. 
+        //예전 EVM에서는 모든 가스를 소비했지만, 이제는 그렇지 않다. 
+        // 'require'로 무엇이 잘못되었는지 설명을 추가할 수 있다. 
+        
         require(
             msg.sender == chairperson,
             "Only chairperson can give right to vote."
@@ -92,7 +85,7 @@ contract Ballot {
         voters[voter].weight = 1;
     }
 
-    /// Delegate your vote to the voter `to`.
+    /// 투표권을 'to'에게 위임한다. 
     function delegate(address to) public {
         // assigns reference
         Voter storage sender = voters[msg.sender];
@@ -100,14 +93,8 @@ contract Ballot {
 
         require(to != msg.sender, "Self-delegation is disallowed.");
 
-        // Forward the delegation as long as
-        // `to` also delegated.
-        // In general, such loops are very dangerous,
-        // because if they run too long, they might
-        // need more gas than is available in a block.
-        // In this case, the delegation will not be executed,
-        // but in other situations, such loops might
-        // cause a contract to get "stuck" completely.
+        // 'to'도 위임된 경우, 위임한다. 
+        // 일반적으로 이 루프는 위험하다. 
         while (voters[to].delegate != address(0)) {
             to = voters[to].delegate;
 
@@ -115,24 +102,21 @@ contract Ballot {
             require(to != msg.sender, "Found loop in delegation.");
         }
 
-        // Since `sender` is a reference, this
-        // modifies `voters[msg.sender].voted`
+        // 'sender'는 참조이므로, 'voters[msg.sender].voted' 를 수정한다. 
         sender.voted = true;
         sender.delegate = to;
         Voter storage delegate_ = voters[to];
         if (delegate_.voted) {
-            // If the delegate already voted,
-            // directly add to the number of votes
+            // 대표자가 이미 투표한 경우 , 'voteCount'에 직접 추가
             proposals[delegate_.vote].voteCount += sender.weight;
         } else {
-            // If the delegate did not vote yet,
-            // add to her weight.
+            // 대표자가 투표하지 않은 경우, 대표자의 weight 직접 추가 
             delegate_.weight += sender.weight;
         }
     }
 
-    /// Give your vote (including votes delegated to you)
-    /// to proposal `proposals[proposal].name`.
+    /// Proposal할 위임 받은 투표를 포함한 투표를 내는 함수
+    /// Proposal : 'proposals[proposal].name' 
     function vote(uint proposal) public {
         Voter storage sender = voters[msg.sender];
         require(sender.weight != 0, "Has no right to vote");
@@ -140,14 +124,11 @@ contract Ballot {
         sender.voted = true;
         sender.vote = proposal;
 
-        // If `proposal` is out of the range of the array,
-        // this will throw automatically and revert all
-        // changes.
+        // `proposal`이 배열  범위에 벗어나면, 자동으로 throw되고, 모든 변경사항이 revert 된다. 
         proposals[proposal].voteCount += sender.weight;
     }
 
-    /// @dev Computes the winning proposal taking all
-    /// previous votes into account.
+    /// account에 이전의 모든 표를 고려하여 winning proposal를 계산하는 함수
     function winningProposal() public view
             returns (uint winningProposal_)
     {
@@ -160,9 +141,8 @@ contract Ballot {
         }
     }
 
-    // Calls winningProposal() function to get the index
-    // of the winner contained in the proposals array and then
-    // returns the name of the winner
+    // proposals array 에 포함된 winner의 인덱스를 얻는 함수를 호출하고,
+    // winner의 이름을 반환한다. 
     function winnerName() public view
             returns (bytes32 winnerName_)
     {
