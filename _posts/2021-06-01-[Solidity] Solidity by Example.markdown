@@ -261,9 +261,7 @@ contract SimpleAuction {
 
     // 경매를 끝내고 최고 낙찰가를을 낙찰자에게 보낸다. 
     function auctionEnd() public {
-        // It is a good guideline to structure functions that interact
-        // with other contracts (i.e. they call functions or send Ether)
-        // into three phases:
+        // 다른 contract와 interact하는 function을 다음 3단계로 구조화하는 것은 좋은 가이드라인임
         // 1. 조건 체크하기 
         // 2. 경매 수행하기
         // 3. 다른 contract와 거래
@@ -365,15 +363,6 @@ contract BlindAuction {
         revealEnd = biddingEnd + _revealTime;
     }
 
-  
-    /// The sent ether is only refunded if the bid is correctly
-    /// revealed in the revealing phase. The bid is valid if the
-    /// ether sent together with the bid is at least "value" and
-    /// "fake" is not true. Setting "fake" to true and sending
-    /// not the exact amount are ways to hide the real bid but
-    /// still make the required deposit. The same address can
-    /// place multiple bids.
-    
     /// `_blindedBid` = keccak256(abi.encodePacked(value, fake, secret)) 로 블라인드 입찰로 둔다.
     // 입찰이 the revealing phase에서 정확히 드러난 경우에만 send ether가 환불된다. 
     // 입찰과 함께 보낸 ether가 적어도 "value"이고 "false"가 참이 아닐 경우 입찰은 유효하다.
@@ -508,9 +497,9 @@ contract Purchase {
     error OnlyBuyer();
     /// Only the seller can call this function.
     error OnlySeller();
-    /// The function cannot be called at the current state.
+    /// 현재 state에서 함수가 호출될 수 없는 경우
     error InvalidState();
-    /// The provided value has to be even.
+    /// 제공된 value가 짝수가 되야하는 경우
     error ValueNotEven();
 
     modifier onlyBuyer() {
@@ -536,9 +525,9 @@ contract Purchase {
     event ItemReceived();
     event SellerRefunded();
 
-    // Ensure that `msg.value` is an even number.
-    // Division will truncate if it is an odd number.
-    // Check via multiplication that it wasn't an odd number.
+    // `msg.value`가 짝수인지 확인한다. 
+    // 홀수 인경우 나머지를 자른다. 
+    // 곱셈을 통해 홀수가 아니었는지 확인한다. 홀수인 경우, error
     constructor() payable {
         seller = payable(msg.sender);
         value = msg.value / 2;
@@ -546,9 +535,9 @@ contract Purchase {
             revert ValueNotEven();
     }
 
-    /// Abort the purchase and reclaim the ether.
-    /// Can only be called by the seller before
-    /// the contract is locked.
+
+    /// 구매를 abort(중단)하고 ether를 회수한다. 
+    /// contract가 lock되기 전에 seller에 의해서만 호출 가능하다.   
     function abort()
         public
         onlySeller
@@ -556,17 +545,13 @@ contract Purchase {
     {
         emit Aborted();
         state = State.Inactive;
-        // We use transfer here directly. It is
-        // reentrancy-safe, because it is the
-        // last call in this function and we
-        // already changed the state.
+        // transfer를 직접 사용한다. 
+        // 이 함수에서 마지막 호출이고, 이미 state를 변경했기 때문에reentrancy-safe 하다.
         seller.transfer(address(this).balance);
     }
 
-    /// Confirm the purchase as buyer.
-    /// Transaction has to include `2 * value` ether.
-    /// The ether will be locked until confirmReceived
-    /// is called.
+    /// buyer로서 구매를 확인한다. 
+    /// transaction에는 '2 * value' ether가 포함되어있어야하고, ether는 'confirmReceived'가 호출될때가 지 lock되어 있을것이다.  
     function confirmPurchase()
         public
         inState(State.Created)
@@ -575,36 +560,33 @@ contract Purchase {
     {
         emit PurchaseConfirmed();
         buyer = payable(msg.sender);
-        state = State.Locked;
+        state = State.Locked; 
     }
-
-    /// Confirm that you (the buyer) received the item.
-    /// This will release the locked ether.
+    
+    /// 아이템을 받았는지 buyer가 확인한다. 
+    /// lock 되어있는 ether가 해제될 것이다. 
     function confirmReceived()
         public
         onlyBuyer
         inState(State.Locked)
     {
         emit ItemReceived();
-        // It is important to change the state first because
-        // otherwise, the contracts called using `send` below
-        // can call in again here.
+        // state를 첫번째로 바꾸는 것은 중요하다. 
+        // 그러지 않으면 contract는 아래의 'send'를 사용해서 호출한 contract가 여기서 다시 호출 될 수 있다. 
         state = State.Release;
 
         buyer.transfer(value);
     }
 
-    /// This function refunds the seller, i.e.
-    /// pays back the locked funds of the seller.
+    /// seller에게 환불하는 함수이다. == 판매자의 lock된 자금을 환불함
     function refundSeller()
         public
         onlySeller
         inState(State.Release)
     {
         emit SellerRefunded();
-        // It is important to change the state first because
-        // otherwise, the contracts called using `send` below
-        // can call in again here.
+        // state를 첫번째로 바꾸는 것이 중요하다. 
+        // 그러지 않으면, contract는 아래의 'send'를 사용해서 호출한 contract가 여기서 다시 호출 될 
         state = State.Inactive;
 
         seller.transfer(3 * value);
