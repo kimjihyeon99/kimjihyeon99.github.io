@@ -727,7 +727,9 @@ contract TestToken {
 
 - `virtual`이나 `override`키워드를 사용해서 명시적으로 사용하도록 설정해야함
 - `contract`가 다른 contract로부터 상속했을때, 하나의 contract만 blockchain에서 생성되고, **모든 base contract의 코드가 생성된 contract으로 컴파일됨**
+- **예) contract a,b,c가 있을 때 b가 a를 상속하고, c가 b를 상속했을때 a,b가 base가 되고 c가 블록에 올라감, c를 컴파일 하면 a,b의 정보까지 컴파일 됨**   
 - 즉, base contract의 함수에 대한 모든 internal 호출도 internal 함수 호출만 사용함
+- **예) a,b에 대한 정보가 c에 있기 때문에, c에서 a,b의 함수를 호출 했을 때 내부함수 호출만 사용한다.  **
 - state variable shadowing은 error로 간주됨.
 - derived contract은 동일한 이름을 가진 state variable가 어디에도 없는 경우에만 선언할 수 있다.
 
@@ -1230,7 +1232,7 @@ contract C {
 
 public 또는 external 라이브러리 function에 대한 external 호출이 가능하지만, 
 
-이런 호출에 대한 **호출 규칙은 Solidity 내부에 있는것으로 간주되고, 일반 contract ABI 대해 지정된 것과 동일하지 않다. **
+Function Signatures and Selectors에 대한 **호출 규칙은 Solidity 내부에 있는것으로 간주되고, 일반 contract ABI 대해 지정된 것과 동일하지 않다. **
 
 external 라이브러리 함수는 external contract 함수보다 더 많은 인자 유형을 지원한다. 
 
@@ -1267,6 +1269,14 @@ contract C {
 
 #### Call Protection For Libraries
 
+* Call Protection?
+
+발행자가 특정 기간동안 다시 구매하는 것을 금지하는 일부 채권의 조항이다. 채권이 보호되는 기간을 연기기간 또는 쿠션이라고한다. 
+
+call protection이 있는 채권을 일반적으로 `deferred callable bonds`라고 한다.
+
+
+
 만약 libarary 코드가 DELEGATECALL 또는 CALLCODE 대신 `CALL`을 사용해 실행된다면, `view`나 `pure`함수가 호출되지 않는 한 revert 될것이다.
 
 EVM은 contract가 `CALL`을 사용하여 호출되었는지 감지할 수 있는 직접적인 방법은 제공하지 않지만,
@@ -1280,11 +1290,12 @@ contract는 `ADDRESS` opcode를 사용하여 현재 실행중인 "위치"를 확
 
 라이브러리의 runtime 코드는 항상 푸시 명령어로 시작하며 컴파일 시간에 20바이트의 0이다. 
 
-배포 코드가 실행되면이 상수는 **메모리**에서 현재 주소로 대체되고 이 수정 된 코드는 계약에 저장됩니다.
+배포 코드가 실행되면이 상수는 **메모리**에서 현재 주소로 대체되고 이 수정 된 코드는 계약에 저장된다.
 
 이로 인해 runtime에 배포 시간 주소가 스택에 푸시되는 첫 번째 상수가되고 디스패처 코드는 현재 주소를  non-view  및 non-pure function에 대해 이 상수와 비교한다.
 
 이는 라이브러리의 체인에 저장된 실제코드가 컴파일러에 의해 `deployedBytecode`로 보고되는 코드와 다르다는 것을 의미한다. 
+
 
 ### Using For
 
