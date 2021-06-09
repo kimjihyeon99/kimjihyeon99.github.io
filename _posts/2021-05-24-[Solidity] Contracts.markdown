@@ -729,7 +729,7 @@ contract TestToken {
 - `contract`가 다른 contract로부터 상속했을때, 하나의 contract만 blockchain에서 생성되고, **모든 base contract의 코드가 생성된 contract으로 컴파일됨**
 - **예) contract a,b,c가 있을 때 b가 a를 상속하고, c가 b를 상속했을때 a,b가 base가 되고 c가 블록에 올라감, c를 컴파일 하면 a,b의 정보까지 컴파일 됨**   
 - 즉, base contract의 함수에 대한 모든 internal 호출도 internal 함수 호출만 사용함
-- **예) a,b에 대한 정보가 c에 있기 때문에, c에서 a,b의 함수를 호출 했을 때 내부함수 호출만 사용한다.  **
+- **예) a,b에 대한 정보가 c에 있기 때문에, c에서 a,b의 함수를 호출 했을 때 내부함수 호출만 사용한다.**
 - state variable shadowing은 error로 간주됨.
 - derived contract은 동일한 이름을 가진 state variable가 어디에도 없는 경우에만 선언할 수 있다.
 
@@ -984,6 +984,7 @@ derived된 contract의 `생성자`를 통해서만 할당되기 때문에 `abstr
 
 > 주의 : 0.7.0 이전에 constructors의 가시성(internal or public)을 지정해야 했다
 
+
 #### Arguments for Base Constructors
 
 아래 설명된 linearization 규칙에 따라 모든 base contract의 `생성자`를 호출한다.
@@ -1232,7 +1233,7 @@ contract C {
 
 public 또는 external 라이브러리 function에 대한 external 호출이 가능하지만, 
 
-Function Signatures and Selectors에 대한 **호출 규칙은 Solidity 내부에 있는것으로 간주되고, 일반 contract ABI 대해 지정된 것과 동일하지 않다. **
+Function Signatures and Selectors에 대한 **호출 규칙은 Solidity 내부에 있는것으로 간주되고, 일반 contract ABI 대해 지정된 것과 동일하지 않다.**
 
 external 라이브러리 함수는 external contract 함수보다 더 많은 인자 유형을 지원한다. 
 
@@ -1263,6 +1264,7 @@ library L {
 contract C {
     function g() public pure returns (bytes4) {
         return L.f.selector;
+        //return bytes4(uint256(keccak256("func(uint256)") >> 224)); : contract ABI
     }
 }
 ````
