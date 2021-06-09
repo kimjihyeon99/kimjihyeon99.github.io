@@ -673,10 +673,10 @@ web3.eth.personal.sign(hash, web3.eth.defaultAccount, function () { console.log(
 
 
 ````Solidity
-// recipient is the address that should be paid.
-// amount, in wei, specifies how much ether should be sent.
-// nonce can be any unique number to prevent replay attacks
-// contractAddress is used to prevent cross-contract replay attacks
+// `recipient`는 지불되어야하는 주소이다. 
+// `amount`(wei)는 얼마의 ether가 보내져야하는지 구체화한다.
+// `nonce`는 replay attacks을 막기 위한 unique한 숫자가 될 수 있다. 
+// `contractAddress`는 cross-contract replay attacks를 막기위해 사용된다. 
 function signPayment(recipient, amount, nonce, contractAddress, callback) {
     var hash = "0x" + abi.soliditySHA3(
         ["address", "uint256", "uint256", "address"],
@@ -726,7 +726,7 @@ contract ReceiverPays {
         require(!usedNonces[nonce]);
         usedNonces[nonce] = true;
 
-        // this recreates the message that was signed on the client
+        // 클라이언트에서 서명된 메시지를 다시 작성한다. 
         bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, nonce, this)));
 
         require(recoverSigner(message, signature) == owner);
@@ -734,13 +734,13 @@ contract ReceiverPays {
         payable(msg.sender).transfer(amount);
     }
 
-    /// destroy the contract and reclaim the leftover funds.
+    /// contract를 바기하고, 남은 자금을 회수한다. 
     function shutdown() public {
         require(msg.sender == owner);
         selfdestruct(payable(msg.sender));
     }
 
-    /// signature methods.
+    /// signature 메소드.
     function splitSignature(bytes memory sig)
         internal
         pure
@@ -770,7 +770,7 @@ contract ReceiverPays {
         return ecrecover(message, v, r, s);
     }
 
-    /// builds a prefixed hash to mimic the behavior of eth_sign.
+    //// eth_sign의 동작을 모방하는 prefixed hash를 빌드한다.  
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
     }
@@ -864,9 +864,8 @@ function signMessage(message, callback) {
     );
 }
 
-// contractAddress is used to prevent cross-contract replay attacks.
-// amount, in wei, specifies how much Ether should be sent.
-
+// `contractAddress`는  cross-contract replay attacks를 막는데 사용된다. 
+// `amount` (in wei)는 얼마의 ether가 보내져야하는지 명시한다. 
 function signPayment(contractAddress, amount, callback) {
     var message = constructPaymentMessage(contractAddress, amount);
     signMessage(message, callback);
@@ -929,9 +928,8 @@ contract SimplePaymentChannel {
         expiration = block.timestamp + duration;
     }
 
-    /// the recipient can close the channel at any time by presenting a
-    /// signed amount from the sender. the recipient will be sent that amount,
-    /// and the remainder will go back to the sender
+    /// 수신자는 송신자로부터 서명된 amount 를 제시하여 언제든지 채널을 닫을 수 있다.
+    /// 수신자는 해당 amount를 보내고, 나머지는 송신자에게 간다.   
     function close(uint256 amount, bytes memory signature) public {
         require(msg.sender == recipient);
         require(isValidSignature(amount, signature));
@@ -940,7 +938,7 @@ contract SimplePaymentChannel {
         selfdestruct(sender);
     }
 
-    /// the sender can extend the expiration at any time
+    /// 송신자는 언제든지 expiration을 연장할 수 있다. 
     function extend(uint256 newExpiration) public {
         require(msg.sender == sender);
         require(newExpiration > expiration);
@@ -948,8 +946,7 @@ contract SimplePaymentChannel {
         expiration = newExpiration;
     }
 
-    /// if the timeout is reached without the recipient closing the channel,
-    /// then the Ether is released back to the sender.
+    /// 만약 the recipient가 채널을 닫는 것 없이 timeout이 되었다면, ether는 송신자에게 보내진다. 
     function claimTimeout() public {
         require(block.timestamp >= expiration);
         selfdestruct(sender);
@@ -962,7 +959,7 @@ contract SimplePaymentChannel {
     {
         bytes32 message = prefixed(keccak256(abi.encodePacked(this, amount)));
 
-        // check that the signature is from the payment sender
+        // payment sender의 서명을 확인한다. 
         return recoverSigner(message, signature) == sender;
     }
 
