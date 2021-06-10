@@ -36,7 +36,7 @@ contract Ballot {
         uint vote;   // index of the voted proposal
     }
 
-    //하나의 Proposal에 대한 type
+    //하나의 Proposal(후보자)에 대한 type
     struct Proposal {
         bytes32 name;   // short name (up to 32 bytes)
         uint voteCount; // number of accumulated votes
@@ -70,15 +70,15 @@ contract Ballot {
     // `chairperson`만 이 함수를 호출 할 수 있다. 
     function giveRightToVote(address voter) public {
         // 'require'의 첫번째 인자로 'false'로 되면 실행이 종료되고, 상태 및 Ether 잔액에 대한 모든 변경사항은 revert 된다. 
-        //예전 EVM에서는 모든 가스를 소비했지만, 이제는 그렇지 않다. 
+        // 예전 EVM에서는 모든 가스를 소비했지만, 이제는 그렇지 않다. 
         // 'require'로 무엇이 잘못되었는지 설명을 추가할 수 있다. 
         
         require(
-            msg.sender == chairperson,
+            msg.sender == chairperson, //sender가 chairperson이 아니면 revert!!
             "Only chairperson can give right to vote."
         );
         require(
-            !voters[voter].voted,
+            !voters[voter].voted, //이미 투표한 투표자라면 revert!!
             "The voter already voted."
         );
         require(voters[voter].weight == 0);
@@ -89,12 +89,12 @@ contract Ballot {
     function delegate(address to) public {
         // assigns reference
         Voter storage sender = voters[msg.sender];
-        require(!sender.voted, "You already voted.");
+        require(!sender.voted, "You already voted."); //이미 투표한 투표자라면 revert!!
 
         require(to != msg.sender, "Self-delegation is disallowed.");
 
         // 'to'도 위임된 경우, 위임한다. 
-        // 일반적으로 이 루프는 위험하다. 
+        // 일반적으로 이 루프는 위험하다. ??
         while (voters[to].delegate != address(0)) {
             to = voters[to].delegate;
 
@@ -107,16 +107,16 @@ contract Ballot {
         sender.delegate = to;
         Voter storage delegate_ = voters[to];
         if (delegate_.voted) {
-            // 대표자가 이미 투표한 경우 , 'voteCount'에 직접 추가
+            // 위임자가 이미 투표한 경우 , 'voteCount'에 직접 추가
             proposals[delegate_.vote].voteCount += sender.weight;
         } else {
-            // 대표자가 투표하지 않은 경우, 대표자의 weight 직접 추가 
+            // 위임자가 투표하지 않은 경우, 대표자의 weight 직접 추가 
             delegate_.weight += sender.weight;
         }
     }
 
-    /// Proposal할 위임 받은 투표를 포함한 투표를 내는 함수
-    /// Proposal : 'proposals[proposal].name' 
+    /// 위임 받은 투표를 포함한 투표를 후보자에게 투표하는 함수 
+    /// 후보자 : 'proposals[proposal].name' 
     function vote(uint proposal) public {
         Voter storage sender = voters[msg.sender];
         require(sender.weight != 0, "Has no right to vote");
