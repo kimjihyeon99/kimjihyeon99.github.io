@@ -163,11 +163,11 @@ contract Ballot {
 
 일반적인 생각은 입찰기간 동안 누구나 입찰을 보낼 수 있다는 것이다.
 
-입찰에는 입찰자들을 입찰에 묶기 위해 돈을 보내는 것이 이미 포함되어있다. 
+입찰에는 입찰자들을 **입찰에 묶기 위해 돈을 보내는 것이 이미 포함**되어있다. 
 
-만약 최고 입찰각가 인상되면, 이전의 최고 낙찰자는 그들의 돈을 돌려받는다.
+만약 최고 입찰가가 인상되면, **이전의 최고 낙찰자는 그들의 돈을 돌려받는다**.
 
-입찰기간이 종료된 후 수익자가 돈을 받으려면 수동으로 계약을 호출해야 하므로 계약이 스스로 활성화 될 수 없다. 
+입찰기간이 종료된 후 수익자가 돈을 받으려면 **수동으로 계약을 호출**해야 하므로 계약이 스스로 활성화 될 수 없다. 
 
 ````Solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -182,8 +182,7 @@ contract SimpleAuction {
     address public highestBidder;
     uint public highestBid;
 
-    // Allowed withdrawals of previous bids
-    // 이전 입찰의 철회 허용
+    // 이전 입찰의 회수 허용
     mapping(address => uint) pendingReturns;
 
     // 마지막에 'true'로 설정되면, 변경이 허용되지 않음
@@ -198,13 +197,14 @@ contract SimpleAuction {
 
     // 슬래시 세개로 표시되어있는 것들은  트랜잭션 확인을 요청하거나 오류가 표시될 때 표시된다.
     
-    /// The auction has already ended.
+    /// 경매가 이미 종료되었음을 나타냄
     error AuctionAlreadyEnded();
-    /// There is already a higher or equal bid.
+ 
+    /// 이미 높거나 같은 입찰가가 존재함
     error BidNotHighEnough(uint highestBid);
-    /// The auction has not ended yet.
+    /// 경매가 아직 끝나지 않았음
     error AuctionNotYetEnded();
-    /// The function auctionEnd has already been called.
+    /// auctionEnd 함수가 이미 호출됨
     error AuctionEndAlreadyCalled();
 
     /// 낙찰자 주소 '_beneficiary'를 대신하여 `_biddingTime`초 입찰 시간을 가진 간단한 auction을 생성한다. 
@@ -216,14 +216,11 @@ contract SimpleAuction {
         auctionEndTime = block.timestamp + _biddingTime;
     }
     
-    // transaction과 같이 보낸 값과 경매에 입찰함
+    // transaction과 같이 보낸 값으로 경매에 입찰함
     // 경매에 낙찰되지 않은 경우, 그 값은 환불된다.  
     function bid() public payable {
-        // No arguments are necessary, all
-        // information is already part of
-        // the transaction. The keyword payable
-        // is required for the function to
-        // be able to receive Ether.
+        // 모든 정보가 이미 transaction의 부분이어서 인자는 필요없음
+        // `payable`키워드는 Ether를 받을 수 있도록 함수에 필요하다.
 
         // 입찰 기간을 넘어서면 revert를 호출한다. 
         if (block.timestamp > auctionEndTime)
@@ -243,7 +240,7 @@ contract SimpleAuction {
         emit HighestBidIncreased(msg.sender, msg.value);
     }
 
-    /// 너무 많이 입찰된 경우 철회 하는 함수
+    /// 너무 많이 입찰된 경우 회수 하는 함수
     function withdraw() public returns (bool) {
         uint amount = pendingReturns[msg.sender];
         if (amount > 0) {    
@@ -308,6 +305,7 @@ contract SimpleAuction {
 - 다음 예는 **최고 입찰액보다 큰 값을 수락함**으로써 이문제를 해결한다. 
 - 공개 단계에서만 확인할 수 있기 때문에 일부 입찰은 무효일 수 있으며, 이는 고의적인것이다. 
 - 입찰자들은 여러개의 높은 혹은 낮은 무효 입찰을 함으로써 경쟁을 혼란스럽게 할 수 있다.
+
 
 ````Solidity
 // SPDX-License-Identifier: GPL-3.0
@@ -419,14 +417,14 @@ contract BlindAuction {
     function withdraw() public {
         uint amount = pendingReturns[msg.sender];
         if (amount > 0) {
-            // 0으로 설정하는게 중요함(위 설명과 중복)
+            // 0으로 설정하는게 중요함
             pendingReturns[msg.sender] = 0;
 
             payable(msg.sender).transfer(amount);
         }
     }
 
-    // 설명 중복
+    ///
     function auctionEnd()
         public
         onlyAfter(revealEnd)
@@ -445,7 +443,7 @@ contract BlindAuction {
             return false;
         }
         if (highestBidder != address(0)) {
-            // 이전에 가장 높은 입찰자에게 환불한다. 
+            // 이전에 가장 높은 입찰자에게 돌려준다. 
             pendingReturns[highestBidder] += highestBid;
         }
         highestBid = value;
@@ -484,8 +482,8 @@ contract Purchase {
     address payable public seller;
     address payable public buyer;
 
-    enum State { Created, Locked, Release, Inactive }
-    // The state variable has a default value of the first member, `State.created`
+    enum State { Created, Locked, Release, Inactive } //enum 선언
+    // state 변수는 `State.created`의 첫번째 member의 default value를 가진다.
     State public state;
 
     modifier condition(bool _condition) {
@@ -613,6 +611,7 @@ A와 B는 서명을 이용해 거래를 승인하는데, 이는 이더리움에�
 
 A는 Ether를 전송할 수 있는 간단한 smart contract를 만들지만, 결제를 시작하기 위해 직접 함수를 호출하는 대신  B가 이를 수행하도록 하여 거래 수수료를 지불 한다. 
 
+
 contract 작동 과정
 
 1. A는 `ReceiverPays` contract를 배포하고, 지불을 처리할 수 있는 충분한 Ether를 첨부한다.
@@ -635,7 +634,8 @@ var hash = web3.utils.sha3("message to sign");
 web3.eth.personal.sign(hash, web3.eth.defaultAccount, function () { console.log("Signed"); });
 ````
 
-> ` web3.eth.personal.sign`는 서명된 데이터에 메시지 길이를 더한다. 먼저 hash를 하기 때문에 메시지는 항상 32byte 길이이며, 따라서 이 길이 접두사는 항상 동일하다.
+> ` web3.eth.personal.sign`는 서명된 데이터에 메시지 길이를 더한다. 
+> 먼저 hash를 하기 때문에 메시지는 항상 32byte 길이이며, 따라서 이 길이 접두사는 항상 동일하다.
 
 
 #### What to Sign
@@ -644,7 +644,7 @@ web3.eth.personal.sign(hash, web3.eth.defaultAccount, function () { console.log(
     
     1. 받는 사람의 주소
     2. 전송되는 양
-    3. `replay attack(?)`에 대한 보호
+    3. `replay attack`에 대한 보호
 
 `replay attack` 
 
@@ -689,11 +689,13 @@ function signPayment(recipient, amount, nonce, contractAddress, callback) {
 
 #### Recovering ther Message Signer in Solidity
 
-일반적으로, ECDSA(?) signature는 두개의 인자 `r`, `s`로 구성되어있다. 
+일반적으로, ECDSA signature는 두개의 인자 `r`, `s`로 구성되어있다. 
 
 이더리움에서 Signature는  메시지 서명에 사용된 계정의 개인 키를 확인하는 데 사용할 수 있는 3번째 매개변수 `v`와  트랜잭션의 sender가 포함된다. 
 
 Solidity 는 메시`r`,`s`인자와 `v`인자와 함께 메시지를 수신하고 메시지 서명에 사용된 주소를 반환하는  built-in function `ecrecover`를 제공한다. 
+
+* [ECDSA Algorithm](https://ko.wikipedia.org/wiki/%ED%83%80%EC%9B%90%EA%B3%A1%EC%84%A0_DSA)
 
 
 #### Extracting the Signature Parameters
@@ -704,11 +706,13 @@ web3.js에의해 생성된 서명은 `r`,`s`,`v`의 결합이므로 첫 번째 �
 
 바이트 배열을 그것의 구성 부분으로 나누는 것은 엉망이기 때문에, `splitSignature` 함수를 사용하기 위해  `inline assembly`를 사용한다. 
 
+
 #### Computing the Message Hash
 
 smart contract는 **어떤 매개 변수가 서명되었는지** 정확히 알아야 하므로 매개 변수에서 메시지를 재생성하여 서명 확인을 위해 사용해야한다. 
 
 `claimPayment`함수에서  `prefixed`, `recoverSigner` 함수를 사용한다. 
+
 
 #### The full contract
 
@@ -734,7 +738,7 @@ contract ReceiverPays {
         payable(msg.sender).transfer(amount);
     }
 
-    /// contract를 바기하고, 남은 자금을 회수한다. 
+    /// contract를 파기하고, 남은 자금을 회수한다. 
     function shutdown() public {
         require(msg.sender == owner);
         selfdestruct(payable(msg.sender));
@@ -777,11 +781,13 @@ contract ReceiverPays {
 }
 ````
 
+
 ### Writing a Simple Payment Channel
 
 A는 이제 간편하지만 완전한 결제 채널 구현을 만든다. 
 
 결제 채널은 암호화 서명을 사용하여 거래 수수료 없이 즉각적으로 안전하게 Ether를 반복적으로 전송한다. 
+
 
 #### What is a Payment Channel?
 
@@ -814,11 +820,13 @@ smart contract는 또한 시간 제한을 적용하므로 A는 수신자가 채�
 
 반면 직원에게 시급과 같은 반복적인 지급에 대해서는 수개월 또는 수년간 개방할 수 있다. 
 
+
 #### Opening the Payment Channel
 
 payment 채널을 열기 위해서, A는 서명날인된 Ether를 를 연결하고 의도된 수신자와 채널이 존재하는 최대 기간을 지정하는  smart contract를 배포한다. 
 
 마지막에 나오는 contract의 간편결제 채널 기능이다. 
+
 
 #### Making Payments
 
@@ -872,6 +880,7 @@ function signPayment(contractAddress, amount, callback) {
 }
 ````
 
+
 #### Closing the Payment Channel
 
 B가 그의 자금을 받을 준비가 되었을때, smart contract의 `close`를 호출해 payment를 close 할 시간다. 
@@ -898,6 +907,7 @@ Solidity 함수는 `ValidSignature` 및 `recoverySigner` 작업이며 ,`Receiver
 
 전체 계약에서 `close` 기능을 볼 수 있다.
 
+
 #### Channel Expiration
 
 B는 언제는지 payment 채널을 닫을 수 있지만, 그렇게 하지 못하면 A는 적립된 자금을 회수할 방법이 필요하다.
@@ -908,6 +918,7 @@ B는 언제는지 payment 채널을 닫을 수 있지만, 그렇게 하지 못�
  
  
 이 함수가 호출된 후에 B는 더 이상 Ether를 수신할 수 없으므로, Expiration에 도달하기 전에 채널을 닫는 것이 중요하다.
+
 
 
 #### The full contract
@@ -1006,6 +1017,7 @@ contract SimplePaymentChannel {
 > 
 > `splitSignature`함수는 모든 보안 체크에 사용하지 않는다. 
 
+
 #### Verifying Payments
 
 이전 섹션에서와 달리, payment 채널에서 메시지는 바로 전송되지 않는다.
@@ -1014,10 +1026,10 @@ contract SimplePaymentChannel {
 
 즉, 수신인이 각 메시지에 대해 자체 검증을 수행하는 것이 중요하다.
 
-그렇지 않으면 수신자가 돈을 받을 수 있다는 보장이 없다. 
+그렇지 않으면 **수신자가 돈을 받을 수 있다는 보장이 없다.** 
 
 
-수신자는 각 메시지를 다음과 같은 과정으로 검증해야한다.
+수신자는 각 메시지를 다음과 같은 과정으로 **검증**해야한다.
 
 1. 메시지에 contract address가 payment 채널과 같은지 검증
 2. 새로운 총 금액이 예상한 금액과 같은지 검증
@@ -1054,6 +1066,7 @@ function isValidSignature(contractAddress, amount, signature, expectedSigner) {
         ethereumjs.Util.stripHexPrefix(expectedSigner).toLowerCase();
 }
 ````
+
 
 ## Modular Contracts
 
