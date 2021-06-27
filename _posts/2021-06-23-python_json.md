@@ -14,4 +14,6 @@ python 언어로 json 파일을 불러오고, 다시 해당 데이터를 json파
 
 자료구조는 dict와 tuple을 사용했고, 추출할때는 array를 불러 올때처럼 값을 가져와 알맞은 key, value로 저장해주었다.
 
-결과 사진은 다음과 같다. 
+결과 코드의 링크는 다음과 같다.
+
+[python_json 연결 구현 코드](https://github.com/kimjihyeon99/Antlr/tree/main/python_json_link) 
