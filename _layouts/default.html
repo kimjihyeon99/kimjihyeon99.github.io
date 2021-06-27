@@ -1,15 +1,16 @@
 <!DOCTYPE html>
+<!--
+    Type on Strap jekyll theme v2.3.7
+    Theme free for personal and commercial use under the MIT license
+    https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
+-->
 <html lang="en">
-{% include head.html %}
-
-<body>
-  {% if site.google-analytics %}
-    {% include analytics.html %}
-  {% endif %}
-  <div class="o-wrapper">
-    {{ content }}
-  </div> <!-- /.o-wrapper -->
-  <div class="c-top" data-icon='ei-chevron-up' data-size='s' title="Scroll To Top"></div> <!-- /.c-top -->
-  {% include javascripts.html %}
-</body>
+  {% include default/head.html %}
+  <body>
+    {% include default/navbar.html %}
+    <div class="content">
+      {{ content }}
+    </div>
+    {% include default/footer.html %}
+  </body>
 </html>

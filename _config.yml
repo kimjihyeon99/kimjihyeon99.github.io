@@ -1,53 +1,54 @@
-title: kimjihyeon's devlog
-description: 
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "kimjihyeon99.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+# SITE CONFIGURATION
+baseurl: "/Type-on-Strap"
+url: "https://sylhare.github.io"
 
-# Author
-author-name:    Jihyeon kim
-author-image:   profile.jpg
-author-job:    Computer Engineering Undergraduate Students
-author-email:   kim.jihyeon078@gmail.com # Add your email for contant form.
-author-twitter: # Add your twitter account
-about-author:   I am a Computer Engineering Undergraduate Students. Always hungry to keep learning.
+# THEME-SPECIFIC CONFIGURATION
+title: Type on Strap                                    # site's title
+description: "A website with blog posts and pages"      # used by search engines
+avatar: assets/img/triangle.png                         # Empty for no avatar in navbar
+favicon: assets/favicon.ico                             # Icon displayed in the tab
 
-# Social settings
-social-twitter:   
-social-facebook:
-social-github:    kimjihyeon99
-social-pinterest: 
-social-instagram: 
-social-youtube:
-social-vk:   
-social-linkedin: jihyeon kim
+# Header and footer text
+header_text: Change <code>header_text</code> in <code>_config.yml</code>  # Change Blog header text
+header_feature_image: assets/img/pexels/triangular.jpeg
+footer_text: >
+  Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/sylhare/Type-on-Strap">Type on Strap</a>
 
-# Newsletter
-mailchimp: # Add your MailChimp form identifier. For example - blogenjoyfreedom.us16.list-manage.com/subscribe/post?u=cd56155d76ddeeb4c0bc4d080&amp;id=7a526cd13e
+# Blog
+excerpt: true                                           # Or "truncate" (first 250 characters), "false" to disable
+post_navigation: true
+color_image: /assets/img/lineart.png                    # A bit transparent for color posts.
 
-# Google Analytics
-google-analytics: # Add your identifier. For example UA-99631805-1
+# Features
+# More in the _data folder for share buttons, author and language
+# For layout customization, go to the "_sass > base" folder, and check "_variables.scss"
+katex: true                                             # Enable if using math markup
+mermaid: true                                           # Enable mermaid-js for sequence and diagrams
+google_analytics:                                       # Tracking ID, e.g. "UA-000000-01"
+cookie_consent: false                                   # To respect the usage of cookies
+color_theme: auto                                       # auto, dark or light
 
-# Comment Section (Disqus)
-disqus-identifier: mr-brown # Add your shortname for Disqus Comment. For example mr-brown
+# Comments
+comments:
+  disqus_shortname:                                     # Your discus shortname for comments
+  cusdis_app_id:                                        # Your cusdis data-app-id
+  utterances:                                           # Enable by filling below information. For more info, go to https://utteranc.es
+    repo:                                               # your public comments repository (e.g. owner/repo)
+    issue-term:                                         # Issue term (e.g. "comment" consider issues with this word in the title as comments)
 
-# Build settings
-markdown: kramdown
-permalink: /:year/:month/:day/:title/
-plugins:
-  - jekyll-paginate
+# PAGINATION
+paginate: 5
+paginate_path: "/blog/page:num"
 
-paginate: 7
-paginate_path: "/page/:num/"
+# PORTFOLIO
+collections:
+  portfolio:
+    output: true
+    permalink: /:collection/:name
 
-include:
-  - _pages
+# BUILD SETTINGS
+plugins: [jekyll-paginate, jekyll-seo-tag, jekyll-feed]
+exclude: [".jekyll-cache", ".idea", "vendor/*", "assets/node_modules/*"]
 
-sass:
-  sass_dir: _sass
-  style: compressed
-
-# Exclude from processing.
-exclude:
-  - Gemfile
-  - Gemfile.lock
-  - vendor
+# theme: type-on-strap                                  # if using the theme as a jekyll theme gem
+remote_theme: sylhare/Type-on-Strap                     # If using as a remote_theme in github
