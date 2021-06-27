@@ -1,7 +1,8 @@
 ---
 layout: post
-title: [RUST] Error handling
+title: Error handling
 tags: [rust, Error]
+excerpt_separator: <!--more-->
 ---
 
 Error Handling은 실패의 가능성을 처리하는 방법임
