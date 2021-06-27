@@ -2,7 +2,6 @@
 layout: post
 title: Error handling
 tags: [rust, Error]
-excerpt_separator: <!--more-->
 ---
 
 Error Handling은 실패의 가능성을 처리하는 방법임
@@ -48,10 +47,11 @@ fn main() {
 `panic!`함수가 호출되면 프로그램 종료되고 오류메시지와 오류 지점이 출력된 후 다음과 같은 문장이 출력됨
 
 
-![image](https://user-images.githubusercontent.com/44187194/109315962-734c4700-788e-11eb-8230-478e7e7b0150.png)
+<img src = "/assets/img/rust/rust1.png">
 
 
 `cargo run RUST_BACKTRACE=full`을 작성하면 `panic!`이 발생했을 때 호출과정을 역추적 할 수 있음
+
 
 기본적으로 디버그 모드로 수행되기 때문에 해당 동작이 가능함
 
