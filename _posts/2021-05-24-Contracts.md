@@ -26,6 +26,7 @@ tags: [solidity, expressions, control]
 
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 contract OwnedToken {
     //따로 TokenCreator 정의되어있음
     TokenCreator creator; 
@@ -494,9 +495,12 @@ contract Sink {
 
 #### Fallback Function
 
-선언식 : `fallback () external [payable]`
+선언식 : 
+
+`fallback () external [payable]`
          
-         fallback (bytes calldata _input) external [payable] returns (bytes memory _output)
+`fallback (bytes calldata _input) external [payable] returns (bytes memory _output)`
+         
          
 - 이 함수는 `external`가시성을 가져야한다.
 - `virtual`될 수 있고, override할 수 있고, modifier를 가질 수 있다. 
@@ -511,6 +515,7 @@ contract Sink {
 예시코드)
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.6.2 <0.9.0;
 
 contract Test {
@@ -826,6 +831,7 @@ contract PriceFeed is Owned, Destructible, Named("GoldFeed") {
    `payable`은 예외적으로 다른 mutability로 변경될 수 없다. 
    
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
 contract Base
@@ -849,6 +855,7 @@ contract Inherited is Middle
 예시코드)
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 contract Base1
 {
     function foo() virtual public {}
@@ -874,6 +881,7 @@ contract Inherited is Base1, Base2
 예시 코드)
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 contract A { function f() public pure{} }
 contract B is A {}
 contract C is A {}
@@ -890,6 +898,7 @@ public state variable가 external함수를 override 할 수 있다. (단, 자기
 예시 코드)
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 contract A
 {
     function f() external view virtual returns(uint) { return 5; }
@@ -913,6 +922,7 @@ Function modifier는 서로 override할 수 있다.
 예시코드) 
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.6.0 <0.9.0;
 
 contract Base
@@ -929,6 +939,7 @@ contract Inherited is Base
 다중의 상속의 경우도, 지정자를 명시해주어야함
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 contract Base1
 {
     modifier foo() virtual {_;}
@@ -960,6 +971,7 @@ contract Inherited is Base1, Base2
 예시코드) 
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
 abstract contract A {
@@ -991,6 +1003,7 @@ derived된 contract의 `생성자`를 통해서만 할당되기 때문에 `abstr
 예시코드)
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
 contract Base {
@@ -1040,6 +1053,7 @@ contract Derived2 is Base {
 다음 코드는 "Linearization of inheritance graph impossible" error 발생한다.
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.4.0 <0.9.0;
 
 contract X {}
@@ -1059,6 +1073,7 @@ C가 X에게 A를 override하도록 요청하기 때문이다.
 예시코드)
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 //  1 - Base2
 //  2 - Base1
 //  3 - Derived2
@@ -1123,6 +1138,7 @@ abstract contract와 비슷하지만, 어떤 기능을 구현할 수는 없다.
 인터페이스는 기본적으로 contract ABI가 나타낼 수 있는 것으로 제한, ABI와 인터페이스 간의 변환은 정보 손실 없이 가능해야 한다.
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 interface Token {
     enum TokenType { Fungible, NonFungible }
     struct Coin { string obverse; string reverse; }
@@ -1138,6 +1154,7 @@ interface Token {
 - interface는 다른 interface를 상속할 수 있다. 
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 interface ParentA {
     function test() external returns (uint256);
 }
