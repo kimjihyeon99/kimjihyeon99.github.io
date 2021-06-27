@@ -60,8 +60,9 @@ fn main() {
 
 <img src = "/assets/img/rust/rust2.png">
 
-2. Option & unwrap
 
+
+2. Option & unwrap   
 
 이전 코드에서 아무런 선물(문자열)을 받지 못할 경우도 나쁜 경우가 되도록 처리할 필요가 있음
 
@@ -72,9 +73,11 @@ fn main() {
 - None : 요소가 없을때
 
 
+
 이 경우는 `match`를 통해 명시적으로 처리되거나 `unwrap`으로 암시적으로 처리됨
 
 암시적 처리는 내부요소를 반환하거나 `panic`을 반환함
+
 
 
 ```rust
@@ -108,7 +111,6 @@ fn main() {
 }
 ```
 
-
 <img src = "/assets/img/rust/rust3.png">
 
 
@@ -123,7 +125,7 @@ fn main() {
 우리는 `Result<T, E>` 열거형을 통해 회복 가능한 오류를 처리할 수 있음
 
 
-3. Result
+1. Result
 
 변수형 종류 
 
@@ -133,7 +135,7 @@ fn main() {
 
 
 
-1)Result 를 사용해 파일 열기 
+1) Result 를 사용해 파일 열기 
 
 > `match`표현식과 같은 방법으로 처리
 
@@ -144,7 +146,7 @@ fn main() {
 결과 : hello.txt 파일 생성
 
 
-2)중첩보다 간단한 방법으로 파일 생성
+2) 중첩보다 간단한 방법으로 파일 생성
 
 
 <img src = "/assets/img/rust/rust5.png">
@@ -156,7 +158,7 @@ fn main() {
      => 개발자의 의도를 더 명확하게 표현하는 동시에 `panic`이 발생한 원인을 더 쉽게 추적 가능함
 
 
-4. Propagation(전파)
+2. Propagation(전파)
 
 오류가 발생했을 때 그 자리에서 처리해주지 않고 
 
@@ -271,14 +273,11 @@ fn read_username_from_file() -> Result<String, io::Error> {
 
     Ok(s)
 }
-
 ```
-
 
 간결하고 가독성 높으면서 오류에 대한 처리가 된 코드가 됨
 
 우리가 작성한 코드를 `fs`의 메서드를 사용하면 더 쉽게 작성할 수 있음
-
 
 ```rust
 use std::error::Error;
@@ -290,17 +289,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 ```
 
+main함수가 리턴할 수 있는 타입중 하나는 `()`이며, `Result<T,E>` 타입을 리턴할 수 있음
 
-- main함수가 리턴할 수 있는 타입중 하나는 ()이며, Result<T,E> 타입을 리턴할 수 있음
+`Box<dyn Error>` 타입은 `trait` 객체라고 부르는 타입, '모든 종류의 에러'를 의미함
 
-- Box<dyn Error> 타입은 trait 객체라고 부르는 타입, '모든 종류의 에러'를 의미함
-
-
-
-### 정리
-
+ ### 정리
+ 
 언제 `panic!`을 호출할지 `Result<T,E>`를 반환할지는 개발자의 판단임
-
 
 `panic!`은 복구할수 없고, 유효하지 않거나 잘못된 값으로 시도하는 실행을 멈추게끔 해줌
 
