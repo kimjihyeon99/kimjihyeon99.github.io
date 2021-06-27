@@ -58,7 +58,7 @@ fn main() {
 
 <출력화면>
 
-![image](https://user-images.githubusercontent.com/44187194/109594431-1f738380-7b56-11eb-8096-343831478a92.png)
+<img src = "/assets/img/rust/rust2.png">
 
 2. Option & unwrap
 
@@ -109,7 +109,7 @@ fn main() {
 ```
 
 
-![image](https://user-images.githubusercontent.com/44187194/109594536-52b61280-7b56-11eb-91a1-9e07da24bc0f.png)
+<img src = "/assets/img/rust/rust3.png">
 
 
 ### 회복 가능한 오류
@@ -138,7 +138,7 @@ fn main() {
 > `match`표현식과 같은 방법으로 처리
 
 
-![image](https://user-images.githubusercontent.com/44187194/109378593-3aa48000-7917-11eb-9634-99595cf8fb37.png)
+<img src = "/assets/img/rust/rust4.png">
 
 
 결과 : hello.txt 파일 생성
@@ -147,7 +147,7 @@ fn main() {
 2)중첩보다 간단한 방법으로 파일 생성
 
 
-![image](https://user-images.githubusercontent.com/44187194/109378645-aa1a6f80-7917-11eb-99fd-5204b23b574b.png)
+<img src = "/assets/img/rust/rust5.png">
 
 
 > `unwrap()`을 사용하면 `Ok` 열거값일 경우 저장된 값 리턴 `Err`열거값인 경우 `panic!` 매크로 호출함
@@ -217,7 +217,7 @@ fn read_username_from_file() -> Result<String, io::Error> {
 파일이 존재할 경우 
 
 
-![image](https://user-images.githubusercontent.com/44187194/109380924-b653fc00-791a-11eb-87f3-8d9b46e8cf8b.png)
+<img src = "/assets/img/rust/rust6.png">
 
 
 오류가 발생하는 지점마다 매번 match 표현을 사용하면 가독성이 떨어짐
