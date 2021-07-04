@@ -12,5 +12,70 @@ tags: [학부생인턴, python, json,solidity]
 
 이 가정에서 파란색 키워드를 생략한 solidity 코드를 input으로 넣으면 output으로 json에서 가져온 정보를 파란색 키워드 자리에 채워 넣었다. 
 
-출력은 다음과 같다. 
+### input.sol 파일
+
+````solidity
+pragma solidity 0.4.4;
+contract MedStats {
+    final address hosipital;
+    unit count;
+    mapping(address!x =>bool@x) risk;
+
+    constructor(){
+        hospital = me;
+        count =0;
+    }
+
+    function record(address don, bool r){
+        require(hospital == me);
+        risk[don] = reveal(r,don);
+        count = count + (r ? 1:0);
+    }
+
+    function check(bool r){
+        require(reveal(r == risk[me],all));
+    }
+}
+````
+
+### json 파일
+
+````json
+{
+	"g_field" :[
+		{
+			"type": "uint",
+			"owner" : "hospital",
+			"name": "count"
+		},
+		{
+			"type": "mapping",
+			"k_type": "address",
+			"v_type": "bool",
+			"owner" : "x",
+			"name" : "risk"
+		}
+	],
+	"functions":[
+		{
+			"signature" : "6f0d85bb",
+			"args" : [
+				{
+					"type": "address",
+					"name": "don"
+				},
+				{
+					"type": "bool",
+					"owner": "me",
+					"name": "r"
+				}
+			]
+		}
+	]
+} 
+````
+
+### 출력 
+
+
 
