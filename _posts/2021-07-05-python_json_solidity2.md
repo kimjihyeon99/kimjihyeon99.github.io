@@ -79,5 +79,4 @@ contract MedStats {
 
 ### 결과
 
-
-
+<img src="/assets/img/solidity/solidity2.JPG">
