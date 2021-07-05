@@ -78,4 +78,4 @@ contract MedStats {
 ### 출력 
 
 
-
+<img src="/assets/img/solidity/solidity1.JPG">
