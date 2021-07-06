@@ -31,3 +31,10 @@ b= int(input())
 
 print(chr(a)) # 65->A
 ````
+
+### 날짜/시간 모듈 이용하기
+
+````python
+time.strftime('%Y-%m-%d', time.localtime(time.time())) #2021-07-06
+time.strftime('%c, time.localtime(time.time())) #Tue Jul  6 21:03:44 2021
+````
