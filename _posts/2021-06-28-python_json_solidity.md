@@ -15,6 +15,7 @@ tags: [학부생인턴, python, json,solidity]
 ### input.sol 파일
 
 ````solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.4.4;
 contract MedStats {
     final address hosipital;
