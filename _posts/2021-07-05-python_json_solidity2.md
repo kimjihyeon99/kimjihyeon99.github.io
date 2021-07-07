@@ -6,7 +6,9 @@ tags: [학부생인턴, python,json,solidity]
 
 ## 이번주 과제 : 지난주에 이어 mapping 함수, reveal 함수도 적용해보기 
 
-reveal 함수는 "name"으로 위치를 찾아 해당하는 "delegate_to"의 값를 추가해 주었다. 
+reveal 함수는 "name"으로 위치를 찾아 해당하는 "delegate_to"의 값를 추가해 주었다.
+
+그리고 check 함수에 대한 키워드도 json 파일에 추가하고, "delegate_to"값을 수정하였다. 
 
 하지만 mapping 함수는 "key_type" 과 "value_type"으로 위치를 찾아 "owner"의 값을 나누어 추가하였다.
 
@@ -69,6 +71,17 @@ contract MedStats {
 					"type": "bool",
 					"owner": "me",
 					"delegate_to": "don",
+					"name": "r"
+				}
+			]
+		},
+		{
+			"signature" : "6f0d85bb",
+			"args" : [
+				{
+					"type": "bool",
+					"owner": "me",
+					"delegate_to": "all",
 					"name": "r"
 				}
 			]
