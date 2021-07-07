@@ -18,6 +18,7 @@ reveal 함수는 "name"으로 위치를 찾아 해당하는 "delegate_to"의 값
 ### input.sol파일
 
 ````Solidity
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.4.4;
 contract MedStats {
     final address hosipital;
