@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "python_json_solidity"
+title: "python_codingtest"
 tags: [코딩테스트, python]
 ---
 
