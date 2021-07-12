@@ -92,3 +92,7 @@ contract MedStats {
 ### 결과
 
 <img src="/assets/img/solidity/solidity3.JPG">
+
+### exam에서 찾은 reveal 코드 
+
+
