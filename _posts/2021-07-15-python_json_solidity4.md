@@ -12,3 +12,83 @@ example 폴더 내의 zkay 파일을 가져와 json과 같이 돌렸을때 잘 �
 
 ### 테스트 결과 
 
+### input.sol 
+
+````solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma zkay >=0.2.0;
+
+contract MedStats {
+    final address hospital;
+    uint@hospital count;
+    mapping(address!x => bool@x) risk;
+
+    constructor() public {
+        hospital = me;
+        count = 0;
+    }
+
+    function record(address pat, bool@me r) public {
+        require(hospital == me);
+        risk[pat] = reveal(r, pat);
+        count = count + (r ? 1 : 0);
+    }
+
+    function check(bool@me r) public {
+        require(reveal(r == risk[me], all));
+    }
+}
+````
+
+### json 파일
+
+````json
+{
+	"g_field" :[
+				{
+					"type": "uint",
+					"owner" : "hospital",
+					"name": "count"
+				},
+				{
+					"type": "mapping",
+					"k_type": "address",
+					"v_type": "bool",
+					"owner" : "!@",
+					"name" : "risk"
+				}
+			],
+	"functions":[
+		{
+			"signature" : "6f0d85bb",
+			"args" : [
+				{
+					"type": "address",
+					"name": "pat"
+				},
+				{
+					"type": "bool",
+					"owner": "me",
+					"delegate_to": "pat",
+					"name": "r"
+				}
+			]
+		},
+		{
+			"signature" : "6f0d85bb",
+			"args" : [
+				{
+					"type": "bool",
+					"owner": "me",
+					"delegate_to": "all",
+					"name": "r"
+				}
+			]
+		}
+	]
+}
+````
+
+### 출력 결과
+
+<img src="/assets/img/solidity/solidity4.JPG">
