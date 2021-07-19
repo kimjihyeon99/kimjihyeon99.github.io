@@ -92,3 +92,7 @@ contract MedStats {
 ### 출력 결과
 
 <img src="/assets/img/solidity/solidity4.JPG">
+
+### PLAS project 내용 정리
+
+[ppt 링크](https://docs.google.com/presentation/d/1RBMQEPCjv1NK33vDz9qa3mwFQfxfeQKHPUezL2KbkGE/edit)
