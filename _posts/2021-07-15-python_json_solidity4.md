@@ -8,7 +8,12 @@ tags: [학부생인턴, python,json,solidity]
 
 reveal 이 들어있는 파일중, reveal 인자 중 파라미터와 로컬 변수만 있다면 `>@`를 추가한다. 
 
-example 폴더 내의 zkay 파일을 가져와 json과 같이 돌렸을때 잘 나오는지 확인한다. 
+example 폴더 내의 zkay 파일을 가져와 json과 같이 돌렸을때 결과가 stone 파일로 잘 나오는지 확인한다.
+
+다양한 코드에 돌려보는 것은 처음이라 모든 zkay 코드에 visitor가 돌아갈 수 있도록 코드를 수정하였다. 
+
+에러사항이 많았지만, for문으로 json을 읽어오면서 해결되었다. 
+
 
 ### 테스트 결과 
 
