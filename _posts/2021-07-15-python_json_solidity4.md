@@ -93,6 +93,64 @@ contract MedStats {
 
 <img src="/assets/img/solidity/solidity4.JPG">
 
+
+### BoolOperation.zkay
+
+````solidity
+pragma zkay >=0.2.0;
+
+contract BoolOperations {
+    function f(uint@me a, uint@me b) public {
+        bool c;
+        c = reveal((a > b) || (a == b), all);
+        c = reveal((a > b) && (a == b), all);
+        c = reveal(!(a > b), all);
+    }
+}
+````
+
+### BoolOperation_json
+
+````json
+{
+	"functions":[
+		{
+			"signature" : "6f0d85bb",
+			"args" : [
+				{
+					"type": "uint",
+					"owner": "me",
+					"delegate_to":"all",
+					"name": "a"
+
+				},
+				{
+					"type": "uint",
+					"owner": "me",
+					"delegate_to": "all",
+					"name": "b"
+				}
+			]
+		}
+	]
+}
+````
+
+### 출력결과 
+
+````solidity
+pragma zkay >=0.2.0;
+contract BoolOperations {
+    function f(uint@me>@all a, uint@me>@all b) public {
+        bool c;
+        c = (a > b) || (a == b);
+        c = (a > b) && (a == b);
+        c = !(a > b);
+    }
+
+}
+````
+
 ### PLAS project 내용 정리
 
 [ppt 링크](https://docs.google.com/presentation/d/1RBMQEPCjv1NK33vDz9qa3mwFQfxfeQKHPUezL2KbkGE/edit)
